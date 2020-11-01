@@ -44,7 +44,6 @@ if [ ! -d .venv ]; then
     .venv/bin/pip3 install wheel
     .venv/bin/pip3 install setuptools
     .venv/bin/pip3 install cython
-    .venv/bin/pip3 install auditwheel
 fi
 
 function clean_build {
@@ -67,11 +66,8 @@ function pip_build {
     # gcc tools/makeheaders.c -o build/makeheaders
     v -v -cg -shared -reuse-tmpc torri.v -o build/libtorri
     # build/makeheaders -h /tmp/v/torri.tmp.so.c >build/torri.h
-    cp /tmp/v/torri.tmp.so.c build/torri.sample.h
+    cp /tmp/v/libtorri.tmp.so.c build/torri.sample.h
     .venv/bin/python setup.py bdist_wheel
-
-    # cp build/libtorri.so dist/
-    # .venv/bin/auditwheel repair dist/*.whl
 }
 
 if [ "x$COMMAND" == "xpip" ]; then
@@ -91,7 +87,7 @@ if [ "x$COMMAND" == "xtests" ] || [ "x$COMMAND" == "xtest" ]; then
     .venv/bin/python3 tests/test_simple.py
 fi
 
-AVAILABLE_COMMANDS="clear clean build test"
+AVAILABLE_COMMANDS="clear clean pip build test"
 echo ''
 [[ $AVAILABLE_COMMANDS =~ (^| )$COMMAND($| ) ]] && echo 'Ok' || echo 'Unknown command: ' "$COMMAND"
 
