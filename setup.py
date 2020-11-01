@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from setuptools import setup
+#from distutils.core import setup, Extension
+from setuptools import setup, Extension
 import io
 import os
 
@@ -32,5 +33,5 @@ setup(name='torri',
           'Programming Language :: Python :: 3',
           'Programming Language :: Python :: Implementation :: CPython',
       ],
-      ext_modules = [Extension('torri.back', ['torri.v'])])
+      ext_modules = [Extension('torri.back', ['torri.v'])]
       )

@@ -1,3 +1,4 @@
 #!/bin/bash
 mkdir -p build
 v -shared torri.v -o build/torri
+python3 setup.py bdist_wheel
