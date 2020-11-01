@@ -40,8 +40,11 @@ setup(name='torri',
             libraries=['torri'],
             language='v',
             extra_compile_args=['-I./'],
-            extra_link_args=['-L./build/'])
+            extra_link_args=['-L./build/', '-Wl,-rpath,$ORIGIN/../../../'])
         ],
         compiler_directives={'language_level': '3'}
-    )
+    ),
+    data_files=[
+        ('.', ['build/libtorri.so']),
+    ]
 )

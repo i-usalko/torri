@@ -1,8 +1,13 @@
+.venv
 build
 __pycache__
+dist
 
 # cython output
 torri.c
+
+# setup.py bdist_wheel output
+torri.egg-info
 
 # IDE specific
 .vscode

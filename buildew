@@ -1,12 +1,97 @@
 #!/bin/bash
 
-# Purge build
-rm -fr build
+# CHECK PYTHON 3
+if command -v python3 &>/dev/null; then
+   echo Python3 available
+else
+   echo Python3 not available, please install it or add to the PATH variable
+   exit 1
+fi
 
-# Build tools for build)
-mkdir -p build
-# gcc tools/makeheaders.c -o build/makeheaders
-v -v -cg -shared -reuse-tmpc torri.v -o build/libtorri
-# build/makeheaders -h /tmp/v/torri.tmp.so.c >build/torri.h
-cp /tmp/v/torri.tmp.so.c build/torri.sample.h
-python3 setup.py bdist_wheel
+# CHECK PIP
+if command -v python3 -m pip &>/dev/null; then
+   echo Pip available
+else
+   echo Pip not available, please install it or add to the PATH variable
+   exit 1
+fi
+
+# CHECK VIRTUALENV COMMAND
+if command -v python3 -m venv &>/dev/null; then
+   echo Venv command available
+else
+   echo Venv not available, please install it [For example: python3 -m pip install python-venv]
+   exit 1
+fi
+
+# PARSE PYTHON_VERSION FROM INPUT ARGUMENTS
+PYTHON_VERSION=3.7m
+while test "$#" -gt 0 ; do
+    case $1 in
+        --python-version) PYTHON_VERSION="$2"; shift ;;
+        *) COMMAND=$1; ;;
+    esac
+    shift
+done
+echo "Python version is ${PYTHON_VERSION}"
+echo ""
+
+# CHECK VENV NOT EXISTS
+if [ ! -d .venv ]; then
+    python${PYTHON_VERSION} -m venv .venv
+    .venv/bin/python tools/get-pip.py
+    # pip building dependency
+    .venv/bin/pip3 install wheel
+    .venv/bin/pip3 install setuptools
+    .venv/bin/pip3 install cython
+    .venv/bin/pip3 install auditwheel
+fi
+
+function clean_build {
+    echo 'Clear previous build'
+    rm -fr dist
+    rm -fr build
+    rm -fr torri.egg-info
+}
+
+if [ "x$COMMAND" == "xclear" ] || [ "x$COMMAND" == "xclean" ]; then
+    clean_build
+fi
+
+function pip_build {
+    clean_build
+    echo 'Build package torri'
+
+    # Build tools for build)
+    mkdir -p build
+    # gcc tools/makeheaders.c -o build/makeheaders
+    v -v -cg -shared -reuse-tmpc torri.v -o build/libtorri
+    # build/makeheaders -h /tmp/v/torri.tmp.so.c >build/torri.h
+    cp /tmp/v/torri.tmp.so.c build/torri.sample.h
+    .venv/bin/python setup.py bdist_wheel
+
+    # cp build/libtorri.so dist/
+    # .venv/bin/auditwheel repair dist/*.whl
+}
+
+if [ "x$COMMAND" == "xpip" ]; then
+    pip_build
+fi
+
+if [ "x$COMMAND" == "xbuild" ]; then
+    pip_build
+fi
+
+
+if [ "x$COMMAND" == "xtests" ] || [ "x$COMMAND" == "xtest" ]; then
+    pip_builc
+
+    .venv/bin/pip uninstall -y torri
+    .venv/bin/pip install dist/*.whl
+    .venv/bin/python3 tests/test_simple.py
+fi
+
+AVAILABLE_COMMANDS="clear clean build test"
+echo ''
+[[ $AVAILABLE_COMMANDS =~ (^| )$COMMAND($| ) ]] && echo 'Ok' || echo 'Unknown command: ' "$COMMAND"
+
