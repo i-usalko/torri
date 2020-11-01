@@ -1,0 +1,3 @@
+#!/bin/bash
+mkdir -p build
+v -shared torri.v -o build/torri
