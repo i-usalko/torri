@@ -1,2 +1,2 @@
 # torri
-Simple stupid library
+Simple library for processing jpeg images with MMAL on Raspberry Pi
