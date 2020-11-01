@@ -1,1 +1,8 @@
 build
+__pycache__
+
+# cython output
+torri.c
+
+# IDE specific
+.vscode
