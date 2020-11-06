@@ -15,7 +15,7 @@ fn C.vcos_init()
 fn C.vchi_initialise(&C.vchi_instance) int
 fn C.vchi_connect(&voidptr, u32, &C.vchi_instance) int
 fn C.vc_vchi_gencmd_init(&C.vchi_instance, &voidptr, u32)
-fn C.vc_gencmd_send(charptr, ...) int
+fn C.vc_gencmd_send(charptr, charptr) int
 fn C.vc_gencmd_read_response(charptr, int) int
 fn C.vc_gencmd_stop()
 fn C.vchi_disconnect(&C.vchi_instance) int
