@@ -6,6 +6,7 @@ module torri
 #include "interface/vmcs_host/vc_vchi_gencmd.h"
 #include "interface/vmcs_host/vc_gencmd_defs.h"
 #include "interface/vchi/vchi.h"
+#include "interface/vchi/connections/connection.h"
 
 struct C.opaque_vchi_instance_handle_t {
 }
@@ -44,14 +45,14 @@ pub fn gencmd(cmd string) string {
 	mut code := C.vchi_initialise(vchi)
 	println('C.vchi_initialise(&vchi) : vchi is ${vchi}, return code is ${code}')
 	mut connections := voidptr(0)
-	code = C.vchi_connect(&connections, 0, byteptr(&vchi))
+	code = C.vchi_connect(&connections, 0, &vchi)
 	if code != 0 {
 		println('VCHI connection failed : return code is ${code}')
 		return 'VCHI connection failed : return code is ${code}'
 	}
 	println('C.vchi_connect(connections, 0, vchi) : return code is ${code}')
-	mut vchi_connections := &C.opaque_vchi_connection_api_t{}
-	C.vc_vchi_gencmd_init(byteptr(&vchi), &vchi_connections, 1)
+	mut vchi_connections := [65535]byte{}
+	C.vc_vchi_gencmd_init(&vchi, &byteptr(&vchi_connections), 1)
 	mut buffer := [GENCMDSERVICE_MSGFIFO_SIZE]byte{}
 	unsafe {
 		C.memcpy(buffer, cmd.str, cmd.len)
