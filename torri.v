@@ -6,9 +6,9 @@ module torri
 #include "interface/vmcs_host/vc_vchi_gencmd.h"
 #include "interface/vmcs_host/vc_gencmd_defs.h"
 
-struct C.vchi_instance {
+struct C.opaque_vchi_instance_handle_t {
 }
-struct C.vchi_connection {
+struct C.opaque_vchi_connection_api_t {
 }
 
 // v issue ? can't found this constant from imports
@@ -39,11 +39,11 @@ pub fn encode_jpeg(file_path string) []byte {
 
 pub fn gencmd(cmd string) ?string {
 	C.vcos_init()
-	mut vchi := C.vchi_instance{}
+	mut vchi := C.opaque_vchi_instance_handle_t{}
 	C.vchi_initialise(&vchi)
 	mut connections := &voidptr(0)
 	C.vchi_connect(connections, 0, vchi)
-	mut vchi_connections := &C.vchi_connection{}
+	mut vchi_connections := &C.opaque_vchi_connection_api_t{}
 	C.vc_vchi_gencmd_init(&vchi, &vchi_connections, 1)
 	mut buffer := [GENCMDSERVICE_MSGFIFO_SIZE]byte{}
 	unsafe {
