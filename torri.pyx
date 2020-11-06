@@ -2,6 +2,7 @@ cimport cython
 
 from typing import AnyStr
 from torri_wrapper cimport *
+from libc.stdlib cimport free
 
 cdef class Torri(object):
 
@@ -10,8 +11,12 @@ cdef class Torri(object):
         cdef string v_string
         v_string.str = <void*>file_path_bytes
         result = torri__encode_jpeg(v_string)
-        #return <object>result.data
-        return <bytes>result.data  # 'Ok'.encode('UTF-8')
+        cdef bytes py_bytes_string
+        try:
+            py_bytes_string = (<char*>result.data)[:result.len]
+            return py_bytes_string
+        finally:
+            free(result.data)
 
     def gencmd(self, cmd: str) -> str:
         cmd_bytes = str.encode('UTF-8')
