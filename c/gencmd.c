@@ -10,14 +10,14 @@ char* send_command(char *command)
     if ( vchi_initialise( &vchi_instance ) != 0)
     {
         fprintf( stderr, "VCHI initialization failed\n" );
-        return -1;
+        return "Error: VCHI initialization failed";
     }
 
     //create a vchi connection
     if ( vchi_connect( NULL, 0, vchi_instance ) != 0)
     {
         fprintf( stderr, "VCHI connection failed\n" );
-        return -1;
+        return "Error: VCHI connection failed";
     }
 
     vc_vchi_gencmd_init(vchi_instance, &vchi_connection, 1 );
@@ -34,8 +34,8 @@ char* send_command(char *command)
     //reset the string
     buffer[0] = '\0';
 
-    buffer_offset = vcos_safe_strcpy( buffer, command, sizeof(buffer), buffer_offset );
-    // buffer_offset = vcos_safe_strcpy( buffer, " ", sizeof(buffer), buffer_offset );
+    buffer_offset = vcos_safe_strcpy( buffer, "get_throttled", sizeof(buffer), buffer_offset );
+    buffer_offset = vcos_safe_strcpy( buffer, " ", sizeof(buffer), buffer_offset );
 
     //send the gencmd for the argument
     if (( ret = vc_gencmd_send( "%s", buffer )) != 0 )
@@ -56,7 +56,6 @@ char* send_command(char *command)
     if ( vchi_disconnect( vchi_instance ) != 0)
     {
         fprintf( stderr, "VCHI disconnect failed\n" );
-        return -1;
     }
     return buffer;
 }
