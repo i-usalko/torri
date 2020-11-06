@@ -1,4 +1,4 @@
-module vchiq_arm
+module bcm_host
 
 import dl
 
