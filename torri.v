@@ -36,7 +36,7 @@ pub fn encode_jpeg(file_path string) []byte {
  * General commands for vchi
  */
 
-pub fn gencmd(cmd string) ?string {
+pub fn gencmd(cmd string) string {
 	C.vcos_init()
 	mut vchi := [4096]byte{}  // Unknown size of VCHI_INSTANCE_T
 	mut code := C.vchi_initialise(&vchi)
@@ -45,7 +45,7 @@ pub fn gencmd(cmd string) ?string {
 	code = C.vchi_connect(connections, 0, vchi)
 	if code != 0 {
 		println('VCHI connection failed : return code is ${code}')
-		return error('VCHI connection failed : return code is ${code}')
+		return 'VCHI connection failed : return code is ${code}'
 	}
 	println('C.vchi_connect(connections, 0, vchi) : return code is ${code}')
 	mut vchi_connections := &C.opaque_vchi_connection_api_t{}
@@ -57,13 +57,13 @@ pub fn gencmd(cmd string) ?string {
 	code = C.vc_gencmd_send('%s', buffer)
 	if code != 0 {
 		println('vc_gencmd_send return not zero code: ${code}')
-		return error('vc_gencmd_send return not zero code: ${code}')
+		return 'vc_gencmd_send return not zero code: ${code}'
 	}
 	println('C.vc_gencmd_send(\'%s\', buffer) : return code is ${code}')
 	code = C.vc_gencmd_read_response(buffer, sizeof(buffer))
 	if code != 0 {
 		println('vc_gencmd_read_response return not zero code: ${code}')
-		return error('vc_gencmd_read_response return not zero code: ${code}')
+		return 'vc_gencmd_read_response return not zero code: ${code}'
 	}
 	println('C.vc_gencmd_read_response(buffer, sizeof(buffer)) : return code is ${code}')
 	C.vc_gencmd_stop()

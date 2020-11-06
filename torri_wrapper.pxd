@@ -25,4 +25,4 @@ cdef extern from 'torri.h':
 	ctypedef array array_byte
 
 	array_byte torri__encode_jpeg(string file_path)
-	Option_string torri__gencmd(string cmd)
+	string torri__gencmd(string cmd)
