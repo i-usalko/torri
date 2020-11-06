@@ -1,7 +1,7 @@
 import unittest
 from torri import Torri
 
-class TestSimple(unittest.TestCase):
+class TestMethods(unittest.TestCase):
 
     def case_one(self):
         t = Torri()
