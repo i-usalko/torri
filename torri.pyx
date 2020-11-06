@@ -23,8 +23,9 @@ cdef class Torri(object):
     def gencmd(self, cmd: str) -> str:
         cmd_bytes = str.encode('UTF-8')
         cdef string v_string
-        v_string.str = <void*>cmd_bytes
+        v_string.str = <char*>cmd_bytes
         v_string.len = len(cmd_bytes)
+        v_string.is_lit = 0
         result = torri__gencmd(v_string)
         cdef bytes py_bytes_string
         if result.ok:
