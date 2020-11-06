@@ -5,6 +5,12 @@ from torri_wrapper cimport *
 
 cdef class Torri(object):
 
+    def init(self, libraries_folder: str = ''):
+        libraries_folder_bytes = libraries_folder.encode('UTF-8')
+        cdef string v_string
+        v_string.str = libraries_folder_bytes
+        return torri__init(v_string)
+
     def encode_jpeg(self, file_path: str) -> AnyStr:
         file_path_bytes = file_path.encode('UTF-8')
         cdef string v_string

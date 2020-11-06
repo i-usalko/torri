@@ -1,5 +1,7 @@
 module torri
 
+import dl
+
 // VideoCore library includes
 #flag -I @VROOT/thirdparty/vc
 
@@ -23,6 +25,20 @@ fn C.vc_gencmd_send(charptr, charptr) int
 fn C.vc_gencmd_read_response(charptr, int) int
 fn C.vc_gencmd_stop()
 fn C.vchi_disconnect(&C.vchi_instance) int
+
+/** ***************************************************************************
+ * Dynamically linked library loading
+ * /opt/vc/lib/libvchiq_arm.so
+ */
+pub fn init(libraries_folder string) bool {
+	mut fixed_path := libraries_folder
+	if fixed_path.len == 0 {
+		fixed_path = '/opt/vc/lib/libvchiq_arm.so'
+	} else {
+		fixed_path = '${libraries_folder}/libvchiq_arm.so'
+	}
+	return dl.open(fixed_path, dl.rtld_now)
+}
 
 /** ***************************************************************************
  * JPEG encoding/decoding
@@ -53,6 +69,6 @@ pub fn gencmd(cmd string) ?string {
 	C.vc_gencmd_stop()
 	C.vchi_disconnect(&vchi)
 
-	return cstring_to_vstring(buffer)
+	return string(buffer)
 }
 

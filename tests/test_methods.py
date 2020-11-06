@@ -10,6 +10,7 @@ class TestSimple(unittest.TestCase):
 
     def case_two(self):
         t = Torri()
+        t.init()
         print(t.gencmd('get_throttled'))
         self.assertTrue(True)
 
