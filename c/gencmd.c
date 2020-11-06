@@ -24,7 +24,7 @@ char* send_command(char *command)
 
 
     int i = 1;
-    char *buffer[ GENCMDSERVICE_MSGFIFO_SIZE ];
+    char buffer[ GENCMDSERVICE_MSGFIFO_SIZE ];
     size_t buffer_offset = 0;
     clock_t before=0, after=0;
     double time_diff;
@@ -57,8 +57,8 @@ char* send_command(char *command)
     {
         fprintf( stderr, "VCHI disconnect failed\n" );
     }
-    char *result = malloc(sizeof( buffer ));
-    vcos_safe_strcpy( result, buffer, sizeof(buffer), 0 );
+    char *result = malloc(strlen( buffer ));
+    vcos_safe_strcpy( result, buffer, strlen(buffer), 0 );
     return result;
 }
 
