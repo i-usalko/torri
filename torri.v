@@ -40,7 +40,7 @@ pub fn gencmd(cmd string) ?string {
 	C.vchi_connect(connections, 0, vchi)
 	mut vchi_connections := &C.vchi_connection{}
 	C.vc_vchi_gencmd_init(&vchi, &vchi_connections, 1)
-	mut buffer := byte[GENCMDSERVICE_MSGFIFO_SIZE]{cmd.str}
+	mut buffer := [GENCMDSERVICE_MSGFIFO_SIZE]byte{cmd.str}
 	C.vc_gencmd_send('%s'.str, buffer)
 	C.vc_gencmd_read_response(buffer, sizeof(buffer))
 	C.vc_gencmd_stop()
