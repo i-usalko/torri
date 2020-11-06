@@ -11,7 +11,7 @@ cdef class Torri(object):
         v_string.str = <void*>file_path_bytes
         result = torri__encode_jpeg(v_string)
         #return <object>result.data
-        return 'Ok'.encode('UTF-8')
+        return <bytes>result.data  # 'Ok'.encode('UTF-8')
 
     def gencmd(self, cmd: str) -> str:
         cmd_bytes = str.encode('UTF-8')
