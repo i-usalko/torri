@@ -1,13 +1,28 @@
 cimport cython
 
 cdef extern from 'torri.h':
-	ctypedef struct string:
-		pass
-	ctypedef struct array:
-		pass
-	ctypedef struct Option_string:
-		pass
-	ctypedef array array_byte
 	ctypedef bool
+	ctypedef byteptr
+	ctypedef voidptr
+	struct string:
+		void* str
+		int len
+		int is_lit
+
+	struct array:
+		int element_size
+		void* data
+		int len
+		int cap
+
+	struct Option_string:
+		int ok
+		int is_none
+		void* v_error
+		int ecode
+		void* data
+
+	ctypedef array array_byte
+
 	array_byte torri__encode_jpeg(string file_path)
 	Option_string torri__gencmd(string cmd)
