@@ -17,4 +17,6 @@ cdef class Torri(object):
         cdef string v_string
         v_string.str = cmd_bytes
         result = torri__gencmd(v_string)
-        return result.str.decode('UTF-8')
+        if result.ok:
+            return result.data.decode('UTF-8')
+        return None

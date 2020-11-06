@@ -5,6 +5,8 @@ cdef extern from 'torri.h':
 		pass
 	ctypedef struct array:
 		pass
+	ctypedef struct Option_string:
+		pass
 	ctypedef array array_byte
 	array_byte torri__encode_jpeg(string file_path)
-	string torri__gencmd(string cmd)
+	Option_string torri__gencmd(string cmd)

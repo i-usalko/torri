@@ -7,8 +7,6 @@ module torri
 #include "interface/vmcs_host/vc_gencmd_defs.h"
 #include "interface/vchi/vchi.h"
 
-struct C.opaque_vchi_instance_handle_t {
-}
 struct C.opaque_vchi_connection_api_t {
 }
 
@@ -40,7 +38,7 @@ pub fn encode_jpeg(file_path string) []byte {
 
 pub fn gencmd(cmd string) ?string {
 	C.vcos_init()
-	mut vchi := C.opaque_vchi_instance_handle_t{}
+	mut vchi := [4096]byte{}  // Unknown size of VCHI_INSTANCE_T
 	C.vchi_initialise(&vchi)
 	mut connections := &voidptr(0)
 	C.vchi_connect(connections, 0, vchi)
@@ -50,7 +48,7 @@ pub fn gencmd(cmd string) ?string {
 	unsafe {
 		C.memcpy(buffer, cmd.str, cmd.len)
 	}
-	C.vc_gencmd_send('%s'.str, buffer)
+	C.vc_gencmd_send('%s', buffer)
 	C.vc_gencmd_read_response(buffer, sizeof(buffer))
 	C.vc_gencmd_stop()
 	C.vchi_disconnect(&vchi)

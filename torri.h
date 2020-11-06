@@ -1,11 +1,14 @@
 #ifndef TORRI_HEADER
 #define TORRI_HEADER
 
+#include <stdbool.h>
+
 typedef void* voidptr;
 typedef unsigned char* byteptr;
 
 typedef struct string string;
 typedef struct array array;
+typedef struct Option_string Option_string;
 
 struct string {
 	byteptr str;
@@ -20,11 +23,17 @@ struct array {
 	int cap;
 };
 
+struct Option_string {
+	bool ok;
+	bool is_none;
+	string v_error;
+	int ecode;
+	byteptr data;
+};
+
 typedef array array_byte;
 
 extern array_byte torri__encode_jpeg(string file_path);
-
-float cmax(float, float);
-int chello();
+extern Option_string torri__gencmd(string cmd);
 
 #endif
