@@ -31,7 +31,7 @@ fn C.vc_gencmd_read_response(charptr, int) int
 fn C.vc_gencmd_stop()
 fn C.vchi_disconnect(voidptr) int
 
-fn C.send_command(charptr) int
+fn C.send_command(charptr) charptr
 
 /** ***************************************************************************
  * JPEG encoding/decoding
@@ -86,7 +86,7 @@ pub fn gencmd(cmd string) string {
 
 	return string(buffer)
 	*/
-	code := C.send_command(cmd.str)
-	return 'Returned code is : ${code}'
+	result := C.send_command(cmd.str)
+	return 'Returned result is : ${string(result)}'
 }
 

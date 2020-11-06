@@ -63,6 +63,7 @@ function pip_build {
 
     # Build tools for build)
     mkdir -p build
+    rm -fr ~/.vmodules/cache/
     # gcc tools/makeheaders.c -o build/makeheaders
     v -v -cg -shared -reuse-tmpc torri.v -o build/libtorri
     # build/makeheaders -h /tmp/v/torri.tmp.so.c >build/torri.h

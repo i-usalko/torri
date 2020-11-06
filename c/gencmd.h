@@ -10,6 +10,6 @@
 #include "interface/vmcs_host/vc_vchi_gencmd.h"
 #include "interface/vmcs_host/vc_gencmd_defs.h"
 
-int send_command(char *command);
+char* send_command(char *command);
 
 #endif  // GENCMD_H

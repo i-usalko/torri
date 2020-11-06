@@ -1,6 +1,6 @@
 #include "gencmd.h"
 
-int send_command(char *command)
+char* send_command(char *command)
 {
     VCHI_INSTANCE_T vchi_instance;
     VCHI_CONNECTION_T *vchi_connection = NULL;
@@ -58,6 +58,6 @@ int send_command(char *command)
         fprintf( stderr, "VCHI disconnect failed\n" );
         return -1;
     }
-    return 0;
+    return buffer;
 }
 
