@@ -45,7 +45,8 @@ setup(name='torri',
                 '-Wl,-rpath,/opt/vc/lib',
             ])
         ],
-        compiler_directives={'language_level': '3'}
+        compiler_directives={'language_level': '3'},
+        gdb_debug=True
     ),
     data_files=[
         ('.', ['build/libtorri.so']),
