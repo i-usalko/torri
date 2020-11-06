@@ -29,7 +29,7 @@ fn C.vchi_disconnect(&C.vchi_instance) int
  */
 
 pub fn encode_jpeg(file_path string) []byte {
-	return 'Ok'.bytes()
+	return '${file_path} But Ok.'.bytes()
 }
 
 /** ***************************************************************************

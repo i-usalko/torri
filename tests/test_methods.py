@@ -5,7 +5,7 @@ class TestMethods(unittest.TestCase):
 
     def test_case_one(self):
         t = Torri()
-        print(t.encode_jpeg(''))
+        print(t.encode_jpeg('Not exist path!'))
         self.assertTrue(True)
 
     def test_case_two(self):
