@@ -8,5 +8,10 @@ class TestSimple(unittest.TestCase):
         print(t.encode_jpeg(''))
         self.assertTrue(True)
 
+    def case_two(self):
+        t = Torri()
+        print(t.gencmd(''))
+        self.assertTrue(True)
+
 if __name__ == '__main__':
     unittest.main()

@@ -88,7 +88,7 @@ if [ "x$COMMAND" == "xtests" ] || [ "x$COMMAND" == "xtest" ]; then
 
     .venv/bin/pip uninstall -y torri
     .venv/bin/pip install dist/*.whl
-    .venv/bin/python3 tests/test_simple.py
+    .venv/bin/python3 tests/test_methods.py
 fi
 
 AVAILABLE_COMMANDS="clear clean build test"
