@@ -5,6 +5,7 @@ module torri
 
 #include "interface/vmcs_host/vc_vchi_gencmd.h"
 #include "interface/vmcs_host/vc_gencmd_defs.h"
+#include "interface/vchi/vchi.h"
 
 struct C.opaque_vchi_instance_handle_t {
 }
