@@ -24,7 +24,7 @@ char* send_command(char *command)
 
 
     int i = 1;
-    char *buffer = malloc( GENCMDSERVICE_MSGFIFO_SIZE );
+    char *buffer[ GENCMDSERVICE_MSGFIFO_SIZE ];
     size_t buffer_offset = 0;
     clock_t before=0, after=0;
     double time_diff;
@@ -34,7 +34,7 @@ char* send_command(char *command)
     //reset the string
     buffer[0] = '\0';
 
-    buffer_offset = vcos_safe_strcpy( buffer, "get_throttled", sizeof(buffer), buffer_offset );
+    buffer_offset = vcos_safe_strcpy( buffer, command, sizeof(buffer), buffer_offset );
     buffer_offset = vcos_safe_strcpy( buffer, " ", sizeof(buffer), buffer_offset );
 
     //send the gencmd for the argument
@@ -57,6 +57,8 @@ char* send_command(char *command)
     {
         fprintf( stderr, "VCHI disconnect failed\n" );
     }
-    return buffer;
+    char *result = malloc(sizeof( buffer ));
+    vcos_safe_strcpy( result, buffer, sizeof(buffer), 0 );
+    return result;
 }
 
