@@ -28,10 +28,17 @@ cdef class Torri(object):
         v_string.is_lit = 0
         result = torri__gencmd(v_string)
         cdef bytes py_bytes_string
+        cdef string error = result.v_error
         if result.ok:
             try:
-                py_bytes_string = (<char*>result.data)[:1]
+                py_bytes_string = (<char*>result.data)[:2]
                 return py_bytes_string.decode('UTF-8')
             finally:
                 free(result.data)
+        else:
+            try:
+                py_bytes_string = (<char*>error.str)[:error.len]
+                raise Exception(py_bytes_string.decode('UTF-8'))
+            finally:
+                free(error.str)
         return None

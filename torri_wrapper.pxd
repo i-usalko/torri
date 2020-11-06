@@ -18,7 +18,7 @@ cdef extern from 'torri.h':
 	struct Option_string:
 		int ok
 		int is_none
-		void* v_error
+		string v_error
 		int ecode
 		void* data
 
