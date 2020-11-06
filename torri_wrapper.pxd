@@ -11,4 +11,3 @@ cdef extern from 'torri.h':
 	ctypedef bool
 	array_byte torri__encode_jpeg(string file_path)
 	Option_string torri__gencmd(string cmd)
-	bool torri__init(string libraries_folder)

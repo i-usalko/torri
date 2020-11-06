@@ -66,7 +66,11 @@ function pip_build {
     # gcc tools/makeheaders.c -o build/makeheaders
     v -v -cg -shared -reuse-tmpc torri.v -o build/libtorri
     # build/makeheaders -h /tmp/v/torri.tmp.so.c >build/torri.h
+    # Mock library for tests
+    v -v -cg -shared -reuse-tmpc thirdparty/mocks/vchiq_arm/vchiq_arm.v -o build/libvchiq_arm
+
     cp /tmp/v/libtorri.tmp.so.c build/torri.sample.h
+    cp /tmp/v/libvchiq_arm.tmp.so.c build/vchiq_arm.sample.h
     .venv/bin/python setup.py bdist_wheel
 }
 
