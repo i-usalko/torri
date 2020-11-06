@@ -21,7 +21,7 @@ cdef class Torri(object):
             free(result.data)
 
     def gencmd(self, cmd: str) -> str:
-        cmd_bytes = str.encode('UTF-8')
+        cmd_bytes = cmd.encode('UTF-8')
         cdef string v_string
         v_string.str = <char*>cmd_bytes
         v_string.len = len(cmd_bytes)
@@ -32,5 +32,5 @@ cdef class Torri(object):
             py_bytes_string = (<char*>result.str)[:result.len]
             return py_bytes_string.decode('UTF-8')
         finally:
-            free(result.str)
+            free(<void*>result.str)
 

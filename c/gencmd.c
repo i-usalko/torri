@@ -24,7 +24,7 @@ char* send_command(char *command)
 
 
     int i = 1;
-    char buffer[ GENCMDSERVICE_MSGFIFO_SIZE ];
+    char *buffer = malloc( GENCMDSERVICE_MSGFIFO_SIZE );
     size_t buffer_offset = 0;
     clock_t before=0, after=0;
     double time_diff;
@@ -35,7 +35,7 @@ char* send_command(char *command)
     buffer[0] = '\0';
 
     buffer_offset = vcos_safe_strcpy( buffer, command, sizeof(buffer), buffer_offset );
-    buffer_offset = vcos_safe_strcpy( buffer, " ", sizeof(buffer), buffer_offset );
+    // buffer_offset = vcos_safe_strcpy( buffer, " ", sizeof(buffer), buffer_offset );
 
     //send the gencmd for the argument
     if (( ret = vc_gencmd_send( "%s", buffer )) != 0 )
