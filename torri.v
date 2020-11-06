@@ -44,14 +44,18 @@ pub fn gencmd(cmd string) string {
 	mut vchi := [65535]byte{}  // Unknown size of VCHI_INSTANCE_T
 	mut code := C.vchi_initialise(vchi)
 	println('C.vchi_initialise(&vchi) : vchi is ${vchi}, return code is ${code}')
-	mut connections := voidptr(0)
-	code = C.vchi_connect(&connections, 0, &vchi)
+	mut vchi_connections := [65535]byte{}
+	for i in 0..5 {
+		code = C.vchi_connect(&byteptr(&vchi_connections), 0, &vchi)
+		if code == 0 {
+			break
+		}
+	}
 	if code != 0 {
 		println('VCHI connection failed : return code is ${code}')
 		return 'VCHI connection failed : return code is ${code}'
 	}
 	println('C.vchi_connect(connections, 0, vchi) : return code is ${code}')
-	mut vchi_connections := [65535]byte{}
 	C.vc_vchi_gencmd_init(&vchi, &byteptr(&vchi_connections), 1)
 	mut buffer := [GENCMDSERVICE_MSGFIFO_SIZE]byte{}
 	unsafe {
