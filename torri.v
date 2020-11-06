@@ -40,7 +40,7 @@ pub fn gencmd(cmd string) ?string {
 	C.vchi_connect(connections, 0, vchi)
 	mut vchi_connections := &C.vchi_connection{}
 	C.vc_vchi_gencmd_init(&vchi, &vchi_connections, 1)
-	mut buffer := [GENCMDSERVICE_MSGFIFO_SIZE]byte{}
+	mut buffer := [C.GENCMDSERVICE_MSGFIFO_SIZE]byte{}
 	unsafe {
 		C.memcpy(buffer, cmd.str, cmd.len)
 	}
