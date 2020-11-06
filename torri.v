@@ -7,6 +7,8 @@ module torri
 #include "interface/vmcs_host/vc_gencmd_defs.h"
 #include "interface/vchi/vchi.h"
 
+struct C.opaque_vchi_instance_handle_t {
+}
 struct C.opaque_vchi_connection_api_t {
 }
 
@@ -38,18 +40,18 @@ pub fn encode_jpeg(file_path string) []byte {
 
 pub fn gencmd(cmd string) string {
 	C.vcos_init()
-	mut vchi := [4096]byte{}  // Unknown size of VCHI_INSTANCE_T
-	mut code := C.vchi_initialise(&vchi)
+	mut vchi := voidptr([65535]byte{})  // Unknown size of VCHI_INSTANCE_T
+	mut code := C.vchi_initialise(vchi)
 	println('C.vchi_initialise(&vchi) : vchi is ${vchi}, return code is ${code}')
-	mut connections := &voidptr(0)
-	code = C.vchi_connect(connections, 0, vchi)
+	mut connections := voidptr(0)
+	code = C.vchi_connect(&connections, 0, vchi)
 	if code != 0 {
 		println('VCHI connection failed : return code is ${code}')
 		return 'VCHI connection failed : return code is ${code}'
 	}
 	println('C.vchi_connect(connections, 0, vchi) : return code is ${code}')
 	mut vchi_connections := &C.opaque_vchi_connection_api_t{}
-	C.vc_vchi_gencmd_init(&vchi, &vchi_connections, 1)
+	C.vc_vchi_gencmd_init(vchi, &vchi_connections, 1)
 	mut buffer := [GENCMDSERVICE_MSGFIFO_SIZE]byte{}
 	unsafe {
 		C.memcpy(buffer, cmd.str, cmd.len)
@@ -67,7 +69,7 @@ pub fn gencmd(cmd string) string {
 	}
 	println('C.vc_gencmd_read_response(buffer, sizeof(buffer)) : return code is ${code}')
 	C.vc_gencmd_stop()
-	code = C.vchi_disconnect(&vchi)
+	code = C.vchi_disconnect(vchi)
 	println('C.vchi_disconnect(&vchi) : return code is ${code}')
 
 	return string(buffer)
