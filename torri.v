@@ -2,11 +2,15 @@ module torri
 
 // VideoCore library includes
 #flag -I @VROOT/thirdparty/vc
+#flag -I @VROOT/c
+#flag @VROOT/c/gencmd.o
 
 #include "interface/vmcs_host/vc_vchi_gencmd.h"
 #include "interface/vmcs_host/vc_gencmd_defs.h"
 #include "interface/vchi/vchi.h"
 #include "interface/vchi/connections/connection.h"
+
+#include "gencmd.h"
 
 struct C.opaque_vchi_instance_handle_t {
 }
@@ -27,6 +31,8 @@ fn C.vc_gencmd_read_response(charptr, int) int
 fn C.vc_gencmd_stop()
 fn C.vchi_disconnect(voidptr) int
 
+fn C.send_command(charptr) int
+
 /** ***************************************************************************
  * JPEG encoding/decoding
  */
@@ -40,6 +46,7 @@ pub fn encode_jpeg(file_path string) []byte {
  */
 
 pub fn gencmd(cmd string) string {
+	/*
 	C.vcos_init()
 	mut vchi := [65535]byte{}  // Unknown size of VCHI_INSTANCE_T
 	mut code := C.vchi_initialise(vchi)
@@ -78,5 +85,8 @@ pub fn gencmd(cmd string) string {
 	println('C.vchi_disconnect(&vchi) : return code is ${code}')
 
 	return string(buffer)
+	*/
+	code := C.send_command(cmd.str)
+	return 'Returned code is : ${code}'
 }
 
