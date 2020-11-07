@@ -130,8 +130,29 @@ static MMAL_STATUS_T config_port(MMAL_PORT_T *port,
    port->format->es->video.crop.y = 0;
    port->format->es->video.crop.width  = width;
    port->format->es->video.crop.height = height;
+
+   port->format->es->video.frame_rate.num = 0;
+   port->format->es->video.frame_rate.den = 1;
+   port->format->es->video.par.num = 1;
+   port->format->es->video.par.den = 1;
+
+
    return mmal_port_format_commit(port);
 }
+
+static void display_port_format_info(MMAL_PORT_T *port)
+{
+   fprintf(stderr, "%s\n", port->name);
+   fprintf(stderr, " type: %i, fourcc: %4.4s\n", port->format->type, (char *)&(port->format)->encoding);
+   fprintf(stderr, " bitrate: %i, framed: %i\n", port->format->bitrate,
+           !!(port->format->flags & MMAL_ES_FORMAT_FLAG_FRAMED));
+   fprintf(stderr, " extra data: %i, %p\n", port->format->extradata_size, port->format->extradata);
+   fprintf(stderr, " width: %i, height: %i, (%i,%i,%i,%i)\n",
+           port->format->es->video.width, port->format->es->video.height,
+           port->format->es->video.crop.x, port->format->es->video.crop.y,
+           port->format->es->video.crop.width, port->format->es->video.crop.height);
+}
+
 
 #define ENCODING_DECODER_IN MMAL_ENCODING_JPEG
 #define ENCODING_DECODER_OUT MMAL_ENCODING_I422
@@ -179,37 +200,17 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
    decoder->control->userdata = (void *)&context;
    _check_mmal(mmal_port_enable(decoder->control, control_callback));
 
-   /* Set the zero-copy parameter on the input port */
-//   status = mmal_port_parameter_set_boolean(decoder->input[0], MMAL_PARAMETER_ZERO_COPY, MMAL_TRUE);
-//   CHECK_STATUS(status, "failed to set zero copy - %s", decoder->input[0]->name);
-
-   /* Set the zero-copy parameter on the output port */
-   _check_mmal(mmal_port_parameter_set_boolean(decoder->output[0], MMAL_PARAMETER_ZERO_COPY, MMAL_TRUE));
-
-   /* Set format of video decoder input port */
-   MMAL_ES_FORMAT_T *format_in = decoder->input[0]->format;
-   format_in->type = MMAL_ES_TYPE_VIDEO;
-   format_in->encoding = ENCODING_DECODER_IN;
-   format_in->es->video.width = 0;
-   format_in->es->video.height = 0;
-   format_in->es->video.frame_rate.num = 0;
-   format_in->es->video.frame_rate.den = 1;
-   format_in->es->video.par.num = 1;
-   format_in->es->video.par.den = 1;
-
-   _check_mmal(mmal_port_format_commit(decoder->input[0]));
-
-   MMAL_ES_FORMAT_T *format_out = decoder->output[0]->format;
-   format_out->encoding = ENCODING_DECODER_OUT;
-
    // Setup decoder component
-   _check_mmal(config_port(decoder->output[0],
+   _check_mmal(config_port(decoder->input[0],
                            ENCODING_DECODER_IN, WIDTH, HEIGHT));
-    //_check_mmal(mmal_port_parameter_set(decoder->output[0],
-    //                                    &source_pattern.hdr));
-    //_check_mmal(mmal_port_parameter_set_boolean(decoder->output[0],
-    //                                            MMAL_PARAMETER_ZERO_COPY,
-    //                                            ZERO_COPY));
+   _check_mmal(config_port(decoder->output[0],
+                           ENCODING_DECODER_OUT, WIDTH, HEIGHT));
+   //_check_mmal(mmal_port_parameter_set(decoder->output[0],
+   //                                    &source_pattern.hdr));
+   _check_mmal(mmal_port_parameter_set_boolean(decoder->output[0],
+                                                MMAL_PARAMETER_ZERO_COPY,
+                                                MMAL_TRUE));
+   /* Set the zero-copy parameter on the output port */
    _check_mmal(mmal_port_enable(decoder->input[0], input_callback));
 
    // Setup the isp component.
@@ -220,28 +221,20 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
    _check_mmal(config_port(isp->output[0],
                            ENCODING_ISP_OUT, WIDTH, HEIGHT));
    _check_mmal(mmal_port_enable(isp->output[0], output_callback));
-   //_check_mmal(mmal_port_parameter_set_boolean(isp->input[0],
-   //                                             MMAL_PARAMETER_ZERO_COPY,
-   //                                             ZERO_COPY));
-   //_check_mmal(mmal_port_parameter_set_boolean(isp->output[0],
-   //                                             MMAL_PARAMETER_ZERO_COPY,
-   //                                             ZERO_COPY));
-
+   _check_mmal(mmal_port_parameter_set_boolean(isp->input[0],
+                                                MMAL_PARAMETER_ZERO_COPY,
+                                                MMAL_TRUE));
+   _check_mmal(mmal_port_parameter_set_boolean(isp->output[0],
+                                                MMAL_PARAMETER_ZERO_COPY,
+                                                MMAL_TRUE));
    /* Display the output port format */
-   fprintf(stderr, "%s\n", decoder->output[0]->name);
-   fprintf(stderr, " type: %i, fourcc: %4.4s\n", format_out->type, (char *)&format_out->encoding);
-   fprintf(stderr, " bitrate: %i, framed: %i\n", format_out->bitrate,
-           !!(format_out->flags & MMAL_ES_FORMAT_FLAG_FRAMED));
-   fprintf(stderr, " extra data: %i, %p\n", format_out->extradata_size, format_out->extradata);
-   fprintf(stderr, " width: %i, height: %i, (%i,%i,%i,%i)\n",
-           format_out->es->video.width, format_out->es->video.height,
-           format_out->es->video.crop.x, format_out->es->video.crop.y,
-           format_out->es->video.crop.width, format_out->es->video.crop.height);
+   display_port_format_info(decoder->output[0]);
+   /* Display the output port format */
+   display_port_format_info(isp->output[0]);
 
    /* Create a queue to store our decoded frame(s). The callback we will get when
     * a frame has been decoded will put the frame into this queue. */
    context.queue = mmal_queue_create();
-
 
    /* The format of both ports is now set so we can get their buffer requirements and create
     * our buffer headers. We use the buffer pool API to create these. */
