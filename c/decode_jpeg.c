@@ -124,8 +124,12 @@ MMAL_BUFFER_HEADER_T* _decode_jpeg(char *file_path)
 
    vcos_semaphore_create(&context.semaphore, "example", 1);
 
+   FILE *source_file = fopen(file_path, "rb");
    printf("OK2\n");
-   SOURCE_OPEN(file_path);
+   if (!source_file) 
+   {
+      goto error;
+   }
 
    /* Create the decoder component.
     * This specific component exposes 2 ports (1 input and 1 output). Like most components
@@ -253,7 +257,9 @@ MMAL_BUFFER_HEADER_T* _decode_jpeg(char *file_path)
       /* Send data to decode to the input port of the video decoder */
       if (!eos_sent && (buffer = mmal_queue_get(pool_in->queue)) != NULL)
       {
-         SOURCE_READ_DATA_INTO_BUFFER(buffer);
+         buffer->length = fread(buffer->data, 1, buffer->alloc_size - 128, source_file);
+         buffer->offset = 0;
+
          if(!buffer->length) eos_sent = MMAL_TRUE;
 
          buffer->flags = buffer->length ? 0 : MMAL_BUFFER_HEADER_FLAG_EOS;
@@ -358,7 +364,7 @@ MMAL_BUFFER_HEADER_T* _decode_jpeg(char *file_path)
    mmal_port_disable(decoder->output[0]);
    mmal_component_disable(decoder);
 
- error:
+error:
    /* Cleanup everything */
    if (pool_in)
       mmal_port_pool_destroy(decoder->input[0], pool_in);
@@ -369,11 +375,13 @@ MMAL_BUFFER_HEADER_T* _decode_jpeg(char *file_path)
    if (context.queue)
       mmal_queue_destroy(context.queue);
 
-   SOURCE_CLOSE();
+   if (source_file) {
+      fclose(source_file);
+   }
    vcos_semaphore_delete(&context.semaphore);
    if (status == MMAL_SUCCESS)
    {
-       return buffer;
+      return buffer;
    }
    return NULL;
 }
