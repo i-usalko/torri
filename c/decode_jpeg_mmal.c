@@ -202,23 +202,15 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
    MMAL_ES_FORMAT_T *format_out = decoder->output[0]->format;
    format_out->encoding = ENCODING_DECODER_OUT;
 
-   _check_mmal(mmal_port_format_commit(decoder->output[0]));
-
-   /* Enable all the input port and the output port.
-    * The callback specified here is the function which will be called when the buffer header
-    * we sent to the component has been processed. */
-   _check_mmal(mmal_port_enable(decoder->input[0], input_callback));
-   //_check_mmal(mmal_port_enable(decoder->output[0], output_callback));
-
    // Setup decoder component
-    _check_mmal(mmal_port_enable(decoder->control, control_callback));
-    _check_mmal(config_port(decoder->output[0],
-                            ENCODING_DECODER_IN, WIDTH, HEIGHT));
+   _check_mmal(config_port(decoder->output[0],
+                           ENCODING_DECODER_IN, WIDTH, HEIGHT));
     //_check_mmal(mmal_port_parameter_set(decoder->output[0],
     //                                    &source_pattern.hdr));
     //_check_mmal(mmal_port_parameter_set_boolean(decoder->output[0],
     //                                            MMAL_PARAMETER_ZERO_COPY,
     //                                            ZERO_COPY));
+   _check_mmal(mmal_port_enable(decoder->input[0], input_callback));
 
    // Setup the isp component.
    _check_mmal(mmal_component_create("vc.ril.isp", &isp));
