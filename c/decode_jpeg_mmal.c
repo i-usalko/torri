@@ -1,5 +1,16 @@
 #include "decode_jpeg_mmal.h"
 
+
+#define _check_mmal(x) \
+    do { \
+        MMAL_STATUS_T status = (x); \
+        if (status != MMAL_SUCCESS) { \
+            fprintf(stderr, "%s:%d: %s: %s (0x%08x)\n", __FILE__, __LINE__, #x, mmal_status_to_string(status), status); \
+            goto error; \
+        } \
+    } while (0)
+
+
 static void log_format(MMAL_ES_FORMAT_T *format, MMAL_PORT_T *port)
 {
    const char *name_type;
@@ -108,10 +119,36 @@ static void output_callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buffer)
    vcos_semaphore_post(&ctx->semaphore);
 }
 
+static MMAL_STATUS_T config_port(MMAL_PORT_T *port,
+                                 const MMAL_FOURCC_T encoding,
+                                 const int width, const int height)
+{
+   port->format->encoding = encoding;
+   port->format->es->video.width  = VCOS_ALIGN_UP(width,  32);
+   port->format->es->video.height = VCOS_ALIGN_UP(height, 16);
+   port->format->es->video.crop.x = 0;
+   port->format->es->video.crop.y = 0;
+   port->format->es->video.crop.width  = width;
+   port->format->es->video.crop.height = height;
+   return mmal_port_format_commit(port);
+}
+
+#define ENCODING_DECODER_IN MMAL_ENCODING_JPEG
+#define ENCODING_DECODER_OUT MMAL_ENCODING_I422
+#define ENCODING_ISP_OUT    MMAL_ENCODING_RGB24
+#define WIDTH  1920
+#define HEIGHT 1088
+#define ZERO_COPY 0
+
+/**
+ * Input file path -> Output RGB image
+ */
 DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
 {
    MMAL_STATUS_T status = MMAL_EINVAL;
    MMAL_COMPONENT_T *decoder = NULL;
+   MMAL_COMPONENT_T *isp = NULL;
+   MMAL_CONNECTION_T *conn_decoder_isp = NULL;
    MMAL_POOL_T *pool_in = NULL, *pool_out = NULL;
    MMAL_BOOL_T eos_sent = MMAL_FALSE, eos_received = MMAL_FALSE;
    unsigned int in_count = 0, out_count = 0;
@@ -158,7 +195,7 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
    /* Set format of video decoder input port */
    MMAL_ES_FORMAT_T *format_in = decoder->input[0]->format;
    format_in->type = MMAL_ES_TYPE_VIDEO;
-   format_in->encoding = MMAL_ENCODING_JPEG;
+   format_in->encoding = ENCODING_DECODER_IN;
    format_in->es->video.width = 0;
    format_in->es->video.height = 0;
    format_in->es->video.frame_rate.num = 0;
@@ -172,7 +209,7 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
    printf("OK7\n");
 
    MMAL_ES_FORMAT_T *format_out = decoder->output[0]->format;
-   format_out->encoding = MMAL_ENCODING_RGB24;
+   format_out->encoding = ENCODING_DECODER_OUT;
    printf("OK8\n");
 
    status = mmal_port_format_commit(decoder->output[0]);
@@ -224,6 +261,30 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
                                 decoder->output[0]->buffer_num,
                                 decoder->output[0]->buffer_size);
    printf("OK13\n");
+
+
+   // Setup the isp component.
+   _check_mmal(mmal_component_create("vc.ril.isp", &isp));
+   _check_mmal(mmal_port_enable(isp->control, control_callback));
+   _check_mmal(config_port(isp->input[0],
+                           ENCODING_DECODER_OUT, WIDTH, HEIGHT));
+   _check_mmal(config_port(isp->output[0],
+                           ENCODING_ISP_OUT, WIDTH, HEIGHT));
+   _check_mmal(mmal_port_parameter_set_boolean(isp->input[0],
+                                                MMAL_PARAMETER_ZERO_COPY,
+                                                ZERO_COPY));
+   _check_mmal(mmal_port_parameter_set_boolean(isp->output[0],
+                                                MMAL_PARAMETER_ZERO_COPY,
+                                                ZERO_COPY));
+   _check_mmal(mmal_component_enable(isp));
+
+   // Connect decoder[0] -- [0]isp
+   _check_mmal(mmal_connection_create(&conn_decoder_isp,
+                                    decoder->output[0], isp->input[0],
+                                    MMAL_CONNECTION_FLAG_TUNNELLING));
+   _check_mmal(mmal_connection_enable(conn_decoder_isp));
+
+   // real work
 
    while ((buffer = mmal_queue_get(pool_out->queue)) != NULL)
    {
