@@ -37,7 +37,7 @@ setup(name='torri',
         [
             Extension('torri',
             sources=['torri.pyx'],
-            libraries=['torri', 'vchiq_arm', 'bcm_host'],
+            libraries=['torri', 'vchiq_arm', 'bcm_host', 'mmal_core'],
             language='v',
             extra_compile_args=['-I./'],
             extra_link_args=[
