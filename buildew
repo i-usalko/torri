@@ -43,7 +43,7 @@ if [ ! -d .venv ]; then
     # pip building dependency
     .venv/bin/pip3 install wheel
     .venv/bin/pip3 install setuptools
-    .venv/bin/pip3 install cython
+    .venv/bin/pip3 install -r build-requirements.txt
 fi
 
 function clean_build {
@@ -99,6 +99,7 @@ fi
 
 if [ "x$COMMAND" == "xtests" ] || [ "x$COMMAND" == "xtest" ]; then
     pip_builc
+    .venv/bin/pip3 install -r tests-requirements.txt
 
     .venv/bin/pip uninstall -y torri
     .venv/bin/pip install dist/*.whl

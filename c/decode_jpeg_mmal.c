@@ -391,6 +391,7 @@ error:
    vcos_semaphore_delete(&context.semaphore);
    if (status != MMAL_SUCCESS)
    {
+      result->length = 0;
       result->errors = "errors";
    }
    printf("OK-1\n");
