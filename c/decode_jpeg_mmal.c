@@ -1,4 +1,4 @@
-#include "decode_jpeg.h"
+#include "decode_jpeg_mmal.h"
 
 static void log_format(MMAL_ES_FORMAT_T *format, MMAL_PORT_T *port)
 {
@@ -108,7 +108,7 @@ static void output_callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buffer)
    vcos_semaphore_post(&ctx->semaphore);
 }
 
-MMAL_BUFFER_HEADER_T* _decode_jpeg(char *file_path)
+DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
 {
    MMAL_STATUS_T status = MMAL_EINVAL;
    MMAL_COMPONENT_T *decoder = NULL;
@@ -116,6 +116,7 @@ MMAL_BUFFER_HEADER_T* _decode_jpeg(char *file_path)
    MMAL_BOOL_T eos_sent = MMAL_FALSE, eos_received = MMAL_FALSE;
    unsigned int in_count = 0, out_count = 0;
    MMAL_BUFFER_HEADER_T *buffer;
+   DECODING_RESULT_T *result;
 
    bcm_host_init();
    printf("OK1\n");
@@ -126,7 +127,7 @@ MMAL_BUFFER_HEADER_T* _decode_jpeg(char *file_path)
 
    FILE *source_file = fopen(file_path, "rb");
    printf("OK2\n");
-   if (!source_file) 
+   if (!source_file)
    {
       goto error;
    }
@@ -336,6 +337,9 @@ MMAL_BUFFER_HEADER_T* _decode_jpeg(char *file_path)
          else
          {
             fprintf(stderr, "decoded frame (flags %x, size %d) count %d\n", buffer->flags, buffer->length, out_count);
+            result->data = malloc(buffer->length);
+            result->length = buffer->length;
+            memcpy(result->data, buffer->data, buffer->length);
 
             // Do something here with the content of the buffer
 
@@ -385,10 +389,10 @@ error:
    }
    printf("OK-2\n");
    vcos_semaphore_delete(&context.semaphore);
-   if (status == MMAL_SUCCESS)
+   if (status != MMAL_SUCCESS)
    {
-      return buffer;
+      result->errors = "errors";
    }
    printf("OK-1\n");
-   return NULL;
+   return result;
 }
