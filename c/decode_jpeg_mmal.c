@@ -173,24 +173,18 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
     * This specific component exposes 2 ports (1 input and 1 output). Like most components
     * its expects the format of its input port to be set by the client in order for it to
     * know what kind of data it will be fed. */
-   status = mmal_component_create(MMAL_COMPONENT_DEFAULT_IMAGE_DECODER, &decoder);
-   CHECK_STATUS(status, "failed to create decoder");
-   printf("OK3\n");
+   _check_mmal(mmal_component_create("vc.ril.image_decode", &decoder));
 
    /* Enable control port so we can receive events from the component */
    decoder->control->userdata = (void *)&context;
-   status = mmal_port_enable(decoder->control, control_callback);
-   CHECK_STATUS(status, "failed to enable control port");
-   printf("OK4\n");
+   _check_mmal(mmal_port_enable(decoder->control, control_callback));
 
    /* Set the zero-copy parameter on the input port */
 //   status = mmal_port_parameter_set_boolean(decoder->input[0], MMAL_PARAMETER_ZERO_COPY, MMAL_TRUE);
 //   CHECK_STATUS(status, "failed to set zero copy - %s", decoder->input[0]->name);
 
    /* Set the zero-copy parameter on the output port */
-   status = mmal_port_parameter_set_boolean(decoder->output[0], MMAL_PARAMETER_ZERO_COPY, MMAL_TRUE);
-   CHECK_STATUS(status, "failed to set zero copy - %s", decoder->output[0]->name);
-   printf("OK5\n");
+   _check_mmal(mmal_port_parameter_set_boolean(decoder->output[0], MMAL_PARAMETER_ZERO_COPY, MMAL_TRUE));
 
    /* Set format of video decoder input port */
    MMAL_ES_FORMAT_T *format_in = decoder->input[0]->format;
@@ -202,19 +196,52 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
    format_in->es->video.frame_rate.den = 1;
    format_in->es->video.par.num = 1;
    format_in->es->video.par.den = 1;
-   printf("OK6\n");
 
-   status = mmal_port_format_commit(decoder->input[0]);
-   CHECK_STATUS(status, "failed to commit format");
-   printf("OK7\n");
+   _check_mmal(mmal_port_format_commit(decoder->input[0]));
 
    MMAL_ES_FORMAT_T *format_out = decoder->output[0]->format;
    format_out->encoding = ENCODING_DECODER_OUT;
-   printf("OK8\n");
 
-   status = mmal_port_format_commit(decoder->output[0]);
-   CHECK_STATUS(status, "failed to commit format");
-   printf("OK9\n");
+   _check_mmal(mmal_port_format_commit(decoder->output[0]));
+
+   /* Enable all the input port and the output port.
+    * The callback specified here is the function which will be called when the buffer header
+    * we sent to the component has been processed. */
+   _check_mmal(mmal_port_enable(decoder->input[0], input_callback));
+   //_check_mmal(mmal_port_enable(decoder->output[0], output_callback));
+
+   // Setup decoder component
+    _check_mmal(mmal_port_enable(decoder->control, control_callback));
+    _check_mmal(config_port(decoder->output[0],
+                            ENCODING_DECODER_IN, WIDTH, HEIGHT));
+    //_check_mmal(mmal_port_parameter_set(decoder->output[0],
+    //                                    &source_pattern.hdr));
+    //_check_mmal(mmal_port_parameter_set_boolean(decoder->output[0],
+    //                                            MMAL_PARAMETER_ZERO_COPY,
+    //                                            ZERO_COPY));
+    _check_mmal(mmal_component_enable(decoder));
+
+   // Setup the isp component.
+   _check_mmal(mmal_component_create("vc.ril.isp", &isp));
+   _check_mmal(mmal_port_enable(isp->control, control_callback));
+   _check_mmal(config_port(isp->input[0],
+                           ENCODING_DECODER_OUT, WIDTH, HEIGHT));
+   _check_mmal(config_port(isp->output[0],
+                           ENCODING_ISP_OUT, WIDTH, HEIGHT));
+   _check_mmal(mmal_port_enable(isp->output[0], output_callback));
+   //_check_mmal(mmal_port_parameter_set_boolean(isp->input[0],
+   //                                             MMAL_PARAMETER_ZERO_COPY,
+   //                                             ZERO_COPY));
+   //_check_mmal(mmal_port_parameter_set_boolean(isp->output[0],
+   //                                             MMAL_PARAMETER_ZERO_COPY,
+   //                                             ZERO_COPY));
+   _check_mmal(mmal_component_enable(isp));
+
+   // Connect decoder[0] -- [0]isp
+   _check_mmal(mmal_connection_create(&conn_decoder_isp,
+                                    decoder->output[0], isp->input[0],
+                                    MMAL_CONNECTION_FLAG_TUNNELLING));
+   _check_mmal(mmal_connection_enable(conn_decoder_isp));
 
    /* Display the output port format */
    fprintf(stderr, "%s\n", decoder->output[0]->name);
@@ -227,63 +254,35 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
            format_out->es->video.crop.x, format_out->es->video.crop.y,
            format_out->es->video.crop.width, format_out->es->video.crop.height);
 
+   /* Create a queue to store our decoded frame(s). The callback we will get when
+    * a frame has been decoded will put the frame into this queue. */
+   context.queue = mmal_queue_create();
+
+
    /* The format of both ports is now set so we can get their buffer requirements and create
     * our buffer headers. We use the buffer pool API to create these. */
    decoder->input[0]->buffer_num = decoder->input[0]->buffer_num_recommended;
    decoder->input[0]->buffer_size = decoder->input[0]->buffer_size_recommended;
    decoder->output[0]->buffer_num = decoder->output[0]->buffer_num_recommended;
    decoder->output[0]->buffer_size = decoder->output[0]->buffer_size_recommended;
+   isp->input[0]->buffer_num = isp->input[0]->buffer_num_recommended;
+   isp->input[0]->buffer_size = isp->input[0]->buffer_size_recommended;
+   isp->output[0]->buffer_num = isp->output[0]->buffer_num_recommended;
+   isp->output[0]->buffer_size = isp->output[0]->buffer_size_recommended;
    pool_in = mmal_port_pool_create(decoder->input[0],
                                    decoder->input[0]->buffer_num,
                                    decoder->input[0]->buffer_size);
 
-   /* Create a queue to store our decoded frame(s). The callback we will get when
-    * a frame has been decoded will put the frame into this queue. */
-   context.queue = mmal_queue_create();
-   printf("OK10\n");
 
    /* Store a reference to our context in each port (will be used during callbacks) */
    decoder->input[0]->userdata = (void *)&context;
    decoder->output[0]->userdata = (void *)&context;
+   isp->input[0]->userdata = (void *)&context;
+   isp->output[0]->userdata = (void *)&context;
 
-   /* Enable all the input port and the output port.
-    * The callback specified here is the function which will be called when the buffer header
-    * we sent to the component has been processed. */
-   status = mmal_port_enable(decoder->input[0], input_callback);
-   CHECK_STATUS(status, "failed to enable input port");
-   printf("OK11\n");
-
-   status = mmal_port_enable(decoder->output[0], output_callback);
-   CHECK_STATUS(status, "failed to enable output port");
-   printf("OK12\n");
-
-   pool_out = mmal_port_pool_create(decoder->output[0],
-                                decoder->output[0]->buffer_num,
-                                decoder->output[0]->buffer_size);
-   printf("OK13\n");
-
-
-   // Setup the isp component.
-   _check_mmal(mmal_component_create("vc.ril.isp", &isp));
-   _check_mmal(mmal_port_enable(isp->control, control_callback));
-   _check_mmal(config_port(isp->input[0],
-                           ENCODING_DECODER_OUT, WIDTH, HEIGHT));
-   _check_mmal(config_port(isp->output[0],
-                           ENCODING_ISP_OUT, WIDTH, HEIGHT));
-   _check_mmal(mmal_port_parameter_set_boolean(isp->input[0],
-                                                MMAL_PARAMETER_ZERO_COPY,
-                                                ZERO_COPY));
-   _check_mmal(mmal_port_parameter_set_boolean(isp->output[0],
-                                                MMAL_PARAMETER_ZERO_COPY,
-                                                ZERO_COPY));
-   _check_mmal(mmal_component_enable(isp));
-
-   // Connect decoder[0] -- [0]isp
-   _check_mmal(mmal_connection_create(&conn_decoder_isp,
-                                    decoder->output[0], isp->input[0],
-                                    MMAL_CONNECTION_FLAG_TUNNELLING));
-   _check_mmal(mmal_connection_enable(conn_decoder_isp));
-
+   pool_out = mmal_port_pool_create(isp->output[0],
+                              isp->output[0]->buffer_num,
+                              isp->output[0]->buffer_size);
    // real work
 
    while ((buffer = mmal_queue_get(pool_out->queue)) != NULL)
