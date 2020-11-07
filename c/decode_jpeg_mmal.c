@@ -219,7 +219,6 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
     //_check_mmal(mmal_port_parameter_set_boolean(decoder->output[0],
     //                                            MMAL_PARAMETER_ZERO_COPY,
     //                                            ZERO_COPY));
-    _check_mmal(mmal_component_enable(decoder));
 
    // Setup the isp component.
    _check_mmal(mmal_component_create("vc.ril.isp", &isp));
@@ -235,13 +234,6 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
    //_check_mmal(mmal_port_parameter_set_boolean(isp->output[0],
    //                                             MMAL_PARAMETER_ZERO_COPY,
    //                                             ZERO_COPY));
-   _check_mmal(mmal_component_enable(isp));
-
-   // Connect decoder[0] -- [0]isp
-   _check_mmal(mmal_connection_create(&conn_decoder_isp,
-                                    decoder->output[0], isp->input[0],
-                                    MMAL_CONNECTION_FLAG_TUNNELLING));
-   _check_mmal(mmal_connection_enable(conn_decoder_isp));
 
    /* Display the output port format */
    fprintf(stderr, "%s\n", decoder->output[0]->name);
@@ -287,16 +279,18 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
 
    while ((buffer = mmal_queue_get(pool_out->queue)) != NULL)
    {
-      //printf("Sending buf %p\n", buffer);
-      status = mmal_port_send_buffer(decoder->output[0], buffer);
-      CHECK_STATUS(status, "failed to send output buffer to decoder");
+      _check_mmal(mmal_port_send_buffer(decoder->output[0], buffer));
    }
-   printf("OK14\n");
 
    /* Component won't start processing data until it is enabled. */
-   status = mmal_component_enable(decoder);
-   CHECK_STATUS(status, "failed to enable decoder component");
-   printf("OK15\n");
+   _check_mmal(mmal_component_enable(decoder));
+   _check_mmal(mmal_component_enable(isp));
+
+   // Connect decoder[0] -- [0]isp
+   _check_mmal(mmal_connection_create(&conn_decoder_isp,
+                                    decoder->output[0], isp->input[0],
+                                    MMAL_CONNECTION_FLAG_TUNNELLING));
+   _check_mmal(mmal_connection_enable(conn_decoder_isp));
 
    /* Start decoding */
    fprintf(stderr, "start decoding\n");
