@@ -39,9 +39,9 @@ pub fn decode_jpeg(file_path string, use_mmal bool, use_mmap bool) []byte {
 		return 'Returned result is : empty'.bytes()
 	}
 	println('torri-ok2')
-	if result.length > 0 {
+	if (*result).length > 0 {
 		mut bytepile := []byte{}
-		bytepile.insert_many(0, byteptr(result.data), int(result.length))
+		bytepile.insert_many(0, byteptr((*result).data), int((*result).length))
 		println('torri-ok4')
 		return bytepile
 	}
