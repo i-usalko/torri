@@ -56,11 +56,17 @@ fn C.send_command(charptr) charptr
 
 pub fn decode_jpeg(file_path string) []byte {
 	result := C._decode_jpeg(file_path.str)
+	println('torri-ok1')
+	if isnil(result) {
+		return 'Returned result is : empty'.bytes()
+	}
+	println('torri-ok2')
 	if result.length > 0 {
 		mut bytepile := []byte{}
 		bytepile.insert_many(0, byteptr(result.data), int(result.length))
 		return bytepile
 	}
+	println('torri-ok3')
 	return 'Returned result is : empty'.bytes()
 }
 

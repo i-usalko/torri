@@ -366,22 +366,29 @@ MMAL_BUFFER_HEADER_T* _decode_jpeg(char *file_path)
 
 error:
    /* Cleanup everything */
+   printf("OK-7\n");
    if (pool_in)
       mmal_port_pool_destroy(decoder->input[0], pool_in);
+   printf("OK-6\n");
    if (pool_out)
       mmal_port_pool_destroy(decoder->output[0], pool_out);
+   printf("OK-5\n");
    if (decoder)
       mmal_component_destroy(decoder);
+   printf("OK-4\n");
    if (context.queue)
       mmal_queue_destroy(context.queue);
+   printf("OK-3\n");
 
    if (source_file) {
       fclose(source_file);
    }
+   printf("OK-2\n");
    vcos_semaphore_delete(&context.semaphore);
    if (status == MMAL_SUCCESS)
    {
       return buffer;
    }
+   printf("OK-1\n");
    return NULL;
 }
