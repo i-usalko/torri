@@ -118,11 +118,13 @@ MMAL_BUFFER_HEADER_T* _decode_jpeg(char *file_path)
    MMAL_BUFFER_HEADER_T *buffer;
 
    bcm_host_init();
+   printf("OK1\n");
 
 //   vcsm_init();
 
    vcos_semaphore_create(&context.semaphore, "example", 1);
 
+   printf("OK2\n");
    SOURCE_OPEN(file_path);
 
    /* Create the decoder component.
@@ -131,11 +133,13 @@ MMAL_BUFFER_HEADER_T* _decode_jpeg(char *file_path)
     * know what kind of data it will be fed. */
    status = mmal_component_create(MMAL_COMPONENT_DEFAULT_IMAGE_DECODER, &decoder);
    CHECK_STATUS(status, "failed to create decoder");
+   printf("OK3\n");
 
    /* Enable control port so we can receive events from the component */
    decoder->control->userdata = (void *)&context;
    status = mmal_port_enable(decoder->control, control_callback);
    CHECK_STATUS(status, "failed to enable control port");
+   printf("OK4\n");
 
    /* Set the zero-copy parameter on the input port */
 //   status = mmal_port_parameter_set_boolean(decoder->input[0], MMAL_PARAMETER_ZERO_COPY, MMAL_TRUE);
@@ -144,6 +148,7 @@ MMAL_BUFFER_HEADER_T* _decode_jpeg(char *file_path)
    /* Set the zero-copy parameter on the output port */
    status = mmal_port_parameter_set_boolean(decoder->output[0], MMAL_PARAMETER_ZERO_COPY, MMAL_TRUE);
    CHECK_STATUS(status, "failed to set zero copy - %s", decoder->output[0]->name);
+   printf("OK5\n");
 
    /* Set format of video decoder input port */
    MMAL_ES_FORMAT_T *format_in = decoder->input[0]->format;
@@ -155,15 +160,19 @@ MMAL_BUFFER_HEADER_T* _decode_jpeg(char *file_path)
    format_in->es->video.frame_rate.den = 1;
    format_in->es->video.par.num = 1;
    format_in->es->video.par.den = 1;
+   printf("OK6\n");
 
    status = mmal_port_format_commit(decoder->input[0]);
    CHECK_STATUS(status, "failed to commit format");
+   printf("OK7\n");
 
    MMAL_ES_FORMAT_T *format_out = decoder->output[0]->format;
    format_out->encoding = MMAL_ENCODING_I420;
+   printf("OK8\n");
 
    status = mmal_port_format_commit(decoder->output[0]);
    CHECK_STATUS(status, "failed to commit format");
+   printf("OK9\n");
 
    /* Display the output port format */
    fprintf(stderr, "%s\n", decoder->output[0]->name);
@@ -189,6 +198,7 @@ MMAL_BUFFER_HEADER_T* _decode_jpeg(char *file_path)
    /* Create a queue to store our decoded frame(s). The callback we will get when
     * a frame has been decoded will put the frame into this queue. */
    context.queue = mmal_queue_create();
+   printf("OK10\n");
 
    /* Store a reference to our context in each port (will be used during callbacks) */
    decoder->input[0]->userdata = (void *)&context;
@@ -199,13 +209,16 @@ MMAL_BUFFER_HEADER_T* _decode_jpeg(char *file_path)
     * we sent to the component has been processed. */
    status = mmal_port_enable(decoder->input[0], input_callback);
    CHECK_STATUS(status, "failed to enable input port");
+   printf("OK11\n");
 
    status = mmal_port_enable(decoder->output[0], output_callback);
    CHECK_STATUS(status, "failed to enable output port");
+   printf("OK12\n");
 
    pool_out = mmal_port_pool_create(decoder->output[0],
                                 decoder->output[0]->buffer_num,
                                 decoder->output[0]->buffer_size);
+   printf("OK13\n");
 
    while ((buffer = mmal_queue_get(pool_out->queue)) != NULL)
    {
@@ -213,10 +226,12 @@ MMAL_BUFFER_HEADER_T* _decode_jpeg(char *file_path)
       status = mmal_port_send_buffer(decoder->output[0], buffer);
       CHECK_STATUS(status, "failed to send output buffer to decoder");
    }
+   printf("OK14\n");
 
    /* Component won't start processing data until it is enabled. */
    status = mmal_component_enable(decoder);
    CHECK_STATUS(status, "failed to enable decoder component");
+   printf("OK15\n");
 
    /* Start decoding */
    fprintf(stderr, "start decoding\n");
@@ -323,6 +338,7 @@ MMAL_BUFFER_HEADER_T* _decode_jpeg(char *file_path)
             out_count++;
          }
       }
+   printf("OK16\n");
 
       /* Send empty buffers to the output port of the decoder */
       while ((buffer = mmal_queue_get(pool_out->queue)) != NULL)
