@@ -17,6 +17,7 @@ cdef class Torri(object):
         result = torri__decode_jpeg(_file_path, _use_mmal, _use_mmap)
         cdef bytes py_bytes_string
         try:
+            print(f'Result length is : {result.len}')
             py_bytes_string = (<unsigned char*>result.data)[:result.len]
             return py_bytes_string
         finally:
