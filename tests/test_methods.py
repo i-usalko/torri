@@ -18,16 +18,16 @@ class TestMethods(unittest.TestCase):
         print(t.gencmd('get_throttled'))
         self.assertTrue(True)
 
-    @unittest.skip  # Manual run only
+    # @unittest.skip  # Manual run only
     def test_case_three(self):
         time = timer()
         t = Torri()
         data = t.decode_jpeg('/media/pi/Transcend/.mock-camera-images/2020-06-22-07-10-39.72866b38fcdb4b8ba0c76f2ba48d7c67-v.jpg')
-        width = 1920
-        height = 1080
-        size = width * height
+        #width = 1920
+        #height = 1088
+        #size = width * height
         rgb_data = np.frombuffer(data, dtype=np.uint8)
-        rgb_data = rgb_data.reshape((1080, 1920, 3))
+        rgb_data = rgb_data.reshape((1088, 1920, 3))
         print(f'Execution time is {timer() - time}s')
 
         success, image_byte_array = cv2.imencode('.jpeg',
@@ -40,7 +40,7 @@ class TestMethods(unittest.TestCase):
 
         self.assertTrue(True)
 
-    @unittest.skip  # Manual run only
+    # @unittest.skip  # Manual run only
     def test_case_four(self):
         time = timer()
         with open('/media/pi/Transcend/.mock-camera-images/2020-06-22-07-10-39.72866b38fcdb4b8ba0c76f2ba48d7c67-v.jpg', 'rb') as reader:
