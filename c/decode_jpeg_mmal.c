@@ -116,7 +116,7 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
    MMAL_BOOL_T eos_sent = MMAL_FALSE, eos_received = MMAL_FALSE;
    unsigned int in_count = 0, out_count = 0;
    MMAL_BUFFER_HEADER_T *buffer;
-   DECODING_RESULT_T *result;
+   DECODING_RESULT_T *result = malloc(sizeof(DECODING_RESULT_T));
 
    bcm_host_init();
    printf("OK1\n");
