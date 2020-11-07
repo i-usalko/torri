@@ -1,7 +1,7 @@
 cimport cython
 
 cdef extern from 'torri.h':
-	ctypedef bool
+	ctypedef bint bool
 	ctypedef byteptr
 	ctypedef voidptr
 	struct string:
@@ -24,5 +24,5 @@ cdef extern from 'torri.h':
 
 	ctypedef array array_byte
 
-	array_byte torri__decode_jpeg(string file_path)
+	array_byte torri__decode_jpeg(string file_path, bool use_mmal, bool use_mmap)
 	string torri__gencmd(string cmd)
