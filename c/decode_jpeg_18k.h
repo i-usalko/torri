@@ -26,6 +26,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#define memcpy_P memcpy
+#define PROGMEM
 // #include <Arduino.h>
 #endif
 
