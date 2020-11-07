@@ -26,16 +26,18 @@ class TestMethods(unittest.TestCase):
         width = 1920
         height = 1080
         size = width * height
-        y = np.frombuffer(data[:size]).reshape((height, width))
-        u = np.frombuffer(data[size:size//4]).reshape((height//2, width//2))
-        v = np.frombuffer(data[size+size//4:size//4]).reshape((height//2, width//2))
+        i420_data = np.frombuffer(data, dtype=np.uint8)
+        y, u, v, _ = np.split(i420_data, [size, size + size//4, size + size//4 + size//4])
+
+        y = y.reshape((height, width))
+        u = u.reshape((height//2, width//2))
+        v = v.reshape((height//2, width//2))
 
         u = cv2.resize(u, (width, height))
         v = cv2.resize(v, (width, height))
         yvu_data = cv2.merge((y, v, u))  # Stack planes to 3D matrix (use Y, U, V ordering)
         rgb_data = cv2.cvtColor(yvu_data, cv2.COLOR_YCrCb2BGR)  # (1080, 1920, 3)
-
-        image_rgb_array = cv2.imdecode(rgb_data, 1)
+        print(f'Execution time is {timer() - time}s')
 
         success, image_byte_array = cv2.imencode('.jpeg',
                                                 rgb_data,
@@ -45,7 +47,6 @@ class TestMethods(unittest.TestCase):
             writer.flush()
             os.fsync(writer.fileno())
 
-        print(f'Execution time is {timer() - time}s')
         self.assertTrue(True)
 
     @unittest.skip  # Manual run only
@@ -55,6 +56,7 @@ class TestMethods(unittest.TestCase):
             image_data = np.frombuffer(reader.read(), dtype=np.uint8)
             rgb_data = cv2.imdecode(image_data, 1)
         print(f'RGB data shape is : {rgb_data.shape}')
+        print(f'Execution time is {timer() - time}s')
 
         success, image_byte_array = cv2.imencode('.jpeg',
                                                 rgb_data,
@@ -64,7 +66,6 @@ class TestMethods(unittest.TestCase):
             writer.flush()
             os.fsync(writer.fileno())
 
-        print(f'Execution time is {timer() - time}s')
         self.assertTrue(True)
 
 
