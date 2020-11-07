@@ -72,12 +72,14 @@ function pip_build {
     v -v -cg -shared -reuse-tmpc thirdparty/mocks/bcm_host/bcm_host.v -o build/libbcm_host
     v -v -cg -shared -reuse-tmpc thirdparty/mocks/mmal_core/mmal_core.v -o build/libmmal_core
     v -v -cg -shared -reuse-tmpc thirdparty/mocks/mmal_util/mmal_util.v -o build/libmmal_util
+    v -v -cg -shared -reuse-tmpc thirdparty/mocks/mmal_components/mmal_components.v -o build/libmmal_components
 
     cp /tmp/v/libtorri.tmp.so.c build/torri.sample.h
     cp /tmp/v/libvchiq_arm.tmp.so.c build/vchiq_arm.sample.h
     cp /tmp/v/libbcm_host.tmp.so.c build/bcm_host.sample.h
     cp /tmp/v/libmmal_core.tmp.so.c build/mmal_core.sample.h
     cp /tmp/v/libmmal_util.tmp.so.c build/mmal_util.sample.h
+    cp /tmp/v/libmmal_components.tmp.so.c build/mmal_components.sample.h
 
     .venv/bin/python setup.py bdist_wheel
 }
