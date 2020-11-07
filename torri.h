@@ -33,7 +33,7 @@ struct Option_string {
 
 typedef array array_byte;
 
-extern array_byte torri__encode_jpeg(string file_path);
+extern array_byte torri__decode_jpeg(string file_path);
 extern string torri__gencmd(string cmd);
 
 #endif
