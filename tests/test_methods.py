@@ -26,17 +26,8 @@ class TestMethods(unittest.TestCase):
         width = 1920
         height = 1080
         size = width * height
-        i420_data = np.frombuffer(data, dtype=np.uint8)
-        y, u, v, _ = np.split(i420_data, [size, size + size//4, size + size//4 + size//4])
-
-        y = y.reshape((height, width))
-        u = u.reshape((height//2, width//2))
-        v = v.reshape((height//2, width//2))
-
-        u = cv2.resize(u, (width, height))
-        v = cv2.resize(v, (width, height))
-        yvu_data = cv2.merge((y, v, u))  # Stack planes to 3D matrix (use Y, U, V ordering)
-        rgb_data = cv2.cvtColor(yvu_data, cv2.COLOR_YCrCb2BGR)  # (1080, 1920, 3)
+        rgb_data = np.frombuffer(data, dtype=np.uint8)
+        rgb_data = rgb_data.reshape((1080, 1920, 3))
         print(f'Execution time is {timer() - time}s')
 
         success, image_byte_array = cv2.imencode('.jpeg',

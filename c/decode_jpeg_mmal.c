@@ -172,7 +172,7 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
    printf("OK7\n");
 
    MMAL_ES_FORMAT_T *format_out = decoder->output[0]->format;
-   format_out->encoding = MMAL_ENCODING_I420;
+   format_out->encoding = MMAL_ENCODING_RGB24;
    printf("OK8\n");
 
    status = mmal_port_format_commit(decoder->output[0]);
