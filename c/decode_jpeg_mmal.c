@@ -71,6 +71,7 @@ static void log_format(MMAL_ES_FORMAT_T *format, MMAL_PORT_T *port)
  * Component is sending us an event. */
 static void control_callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buffer)
 {
+   printf("OK18\n");
    struct CONTEXT_T *ctx = (struct CONTEXT_T *)port->userdata;
 
    switch (buffer->cmd)
@@ -210,7 +211,7 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
    //                                    &source_pattern.hdr));
    _check_mmal(mmal_port_parameter_set_boolean(decoder->output[0],
                                                 MMAL_PARAMETER_ZERO_COPY,
-                                                MMAL_TRUE));
+                                                MMAL_FALSE));
    /* Set the zero-copy parameter on the output port */
    _check_mmal(mmal_port_enable(decoder->input[0], input_callback));
 
@@ -224,10 +225,10 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
    _check_mmal(mmal_port_enable(isp->output[0], output_callback));
    _check_mmal(mmal_port_parameter_set_boolean(isp->input[0],
                                                 MMAL_PARAMETER_ZERO_COPY,
-                                                MMAL_TRUE));
+                                                MMAL_FALSE));
    _check_mmal(mmal_port_parameter_set_boolean(isp->output[0],
                                                 MMAL_PARAMETER_ZERO_COPY,
-                                                MMAL_TRUE));
+                                                MMAL_FALSE));
    /* Display the output port format */
    display_port_format_info(decoder->output[0]);
    /* Display the output port format */
@@ -324,6 +325,7 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
             fprintf(stderr, "received event length %d, %4.4s\n", buffer->length, (char *)&buffer->cmd);
             if (buffer->cmd == MMAL_EVENT_FORMAT_CHANGED)
             {
+               printf("OK17\n");
                MMAL_EVENT_FORMAT_CHANGED_T *event = mmal_event_format_changed_get(buffer);
                if (event)
                {
@@ -375,9 +377,9 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
          else
          {
             fprintf(stderr, "decoded frame (flags %x, size %d) count %d\n", buffer->flags, buffer->length, out_count);
-            //result->data = malloc(buffer->length);
-            //result->length = buffer->length;
-            //memcpy(result->data, buffer->data, buffer->length);
+            result->data = malloc(buffer->length);
+            result->length = buffer->length;
+            memcpy(result->data, buffer->data, buffer->length);
 
             // Do something here with the content of the buffer
 
