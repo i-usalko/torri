@@ -185,6 +185,8 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped, bool debug_inf
 
    vcos_semaphore_create(&context.semaphore, "example", 1);
 
+
+
    FILE *source_file = fopen(file_path, "rb");
    if (!source_file)
    {

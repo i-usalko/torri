@@ -18,7 +18,7 @@ class TestMethods(unittest.TestCase):
         print(t.gencmd('get_throttled'))
         self.assertTrue(True)
 
-    # @unittest.skip  # Manual run only
+    @unittest.skip  # Manual run only
     def test_case_three(self):
         t = Torri()
         time = timer()
@@ -41,7 +41,7 @@ class TestMethods(unittest.TestCase):
 
         self.assertTrue(True)
 
-    # @unittest.skip  # Manual run only
+    @unittest.skip  # Manual run only
     def test_case_four(self):
         time = timer()
         with open('/media/pi/Transcend/.mock-camera-images/2020-06-22-07-10-39.72866b38fcdb4b8ba0c76f2ba48d7c67-v.jpg', 'rb') as reader:

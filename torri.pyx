@@ -6,7 +6,7 @@ from libc.stdlib cimport free
 
 cdef class Torri(object):
 
-    def decode_jpeg(self, file_path: str, width: int, height: int, use_mmal: bool = True, use_mmap: bool = True) -> AnyStr:
+    def decode_jpeg(self, file_path: str, width: int, height: int, use_mmal: bool = True, use_mmap: bool = False) -> AnyStr:
         file_path_bytes = file_path.encode('UTF-8')
         cdef string _file_path
         _file_path.str = <char*>file_path_bytes
