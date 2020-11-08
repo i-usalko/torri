@@ -10,7 +10,7 @@ class TestMethods(unittest.TestCase):
 
     def test_case_one(self):
         t = Torri()
-        print(t.decode_jpeg('Not exist path!', 1920, 1088))
+        print(t.decode_jpeg('Not exist path!', 1920, 1080))
         self.assertTrue(True)
 
     def test_case_two(self):
@@ -22,13 +22,13 @@ class TestMethods(unittest.TestCase):
     def test_case_three(self):
         t = Torri()
         time = timer()
-        data = t.decode_jpeg('/media/pi/Transcend/.mock-camera-images/2020-06-22-07-10-39.72866b38fcdb4b8ba0c76f2ba48d7c67-v.jpg', 1920, 1088)
+        data = t.decode_jpeg('/media/pi/Transcend/.mock-camera-images/2020-06-22-07-10-39.72866b38fcdb4b8ba0c76f2ba48d7c67-v.jpg', 1920, 1080)
         print(f'Execution time decoding is {timer() - time}s')
         #width = 1920
-        #height = 1088
+        #height = 1080
         #size = width * height
         rgb_data = np.array(data, copy=False, dtype=np.uint8)
-        rgb_data = rgb_data.reshape((1088, 1920, 3))
+        rgb_data = rgb_data.reshape((1080, 1920, 3))
         print(f'Execution time total is {timer() - time}s')
 
         success, image_byte_array = cv2.imencode('.jpeg',

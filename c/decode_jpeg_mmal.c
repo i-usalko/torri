@@ -158,9 +158,9 @@ static void display_port_format_info(MMAL_PORT_T *port)
 
 #define ENCODING_DECODER_IN MMAL_ENCODING_JPEG
 #define ENCODING_DECODER_OUT MMAL_ENCODING_I422
-#define ENCODING_ISP_OUT    MMAL_ENCODING_RGB24
+#define ENCODING_ISP_OUT    MMAL_ENCODING_BGR24
 #define WIDTH  1920
-#define HEIGHT 1088
+#define HEIGHT 1080
 #define ZERO_COPY 0
 
 /**
@@ -212,7 +212,7 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped, bool debug_inf
    //                                    &source_pattern.hdr));
    _check_mmal(mmal_port_parameter_set_boolean(decoder->output[0],
                                                 MMAL_PARAMETER_ZERO_COPY,
-                                                MMAL_FALSE));
+                                                MMAL_TRUE));
    /* Set the zero-copy parameter on the output port */
    _check_mmal(mmal_port_enable(decoder->input[0], input_callback));
 
@@ -226,7 +226,7 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped, bool debug_inf
    _check_mmal(mmal_port_enable(isp->output[0], output_callback));
    _check_mmal(mmal_port_parameter_set_boolean(isp->input[0],
                                                 MMAL_PARAMETER_ZERO_COPY,
-                                                MMAL_FALSE));
+                                                MMAL_TRUE));
    _check_mmal(mmal_port_parameter_set_boolean(isp->output[0],
                                                 MMAL_PARAMETER_ZERO_COPY,
                                                 MMAL_FALSE));
