@@ -6,7 +6,7 @@ from libc.stdlib cimport free
 
 cdef class Torri(object):
 
-    def decode_jpeg(self, file_path: str, use_mmal: bool = True, use_mmap: bool = True) -> AnyStr:
+    def decode_jpeg(self, file_path: str, width: int, height: int, use_mmal: bool = True, use_mmap: bool = True) -> AnyStr:
         file_path_bytes = file_path.encode('UTF-8')
         cdef string _file_path
         _file_path.str = <char*>file_path_bytes
@@ -14,8 +14,10 @@ cdef class Torri(object):
         _file_path.is_lit = 0
         cdef bool _use_mmal = use_mmal
         cdef bool _use_mmap = use_mmap
-        result = torri__decode_jpeg(_file_path, _use_mmal, _use_mmap)
-        return memoryview(<unsigned char*>result)
+        # Resturn rgb image
+        cdef const unsigned char * result = torri__decode_jpeg(_file_path, _use_mmal, _use_mmap)
+        cdef unsigned char[:] mview = <unsigned char[:width*height*3]> result
+        return mview
 
     def gencmd(self, cmd: str) -> str:
         cmd_bytes = cmd.encode('UTF-8')

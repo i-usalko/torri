@@ -26,7 +26,7 @@ class TestMethods(unittest.TestCase):
         #width = 1920
         #height = 1088
         #size = width * height
-        rgb_data = np.frombuffer(data, dtype=np.uint8)
+        rgb_data = np.array(data, copy=False, dtype=np.uint8)
         rgb_data = rgb_data.reshape((1088, 1920, 3))
         print(f'Execution time is {timer() - time}s')
 
