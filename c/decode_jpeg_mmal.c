@@ -404,10 +404,8 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
     * will do that anyway */
    _check_mmal(mmal_connection_disable(conn_decoder_isp));
    _check_mmal(mmal_port_disable(decoder->input[0]));
-   _check_mmal(mmal_port_disable(decoder->output[0]));
-   _check_mmal(mmal_component_disable(decoder));
-   _check_mmal(mmal_port_disable(isp->input[0]));
    _check_mmal(mmal_port_disable(isp->output[0]));
+   _check_mmal(mmal_component_disable(decoder));
    _check_mmal(mmal_component_disable(isp));
 
 error:
