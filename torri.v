@@ -19,7 +19,7 @@ struct C.DECODING_RESULT_T {
 	errors charptr
 }
 
-fn C.decode_jpeg_mmal(charptr, bool) &C.DECODING_RESULT_T
+fn C.decode_jpeg_mmal(charptr, bool, bool) &C.DECODING_RESULT_T
 fn C.decode_jpeg_18k(charptr, bool) &C.DECODING_RESULT_T
 fn C.send_command(charptr) charptr
 
@@ -30,7 +30,7 @@ fn C.send_command(charptr) charptr
 pub fn decode_jpeg(file_path string, use_mmal bool, use_mmap bool) byteptr {
 	mut result := &C.DECODING_RESULT_T{}
 	if use_mmal {
-		result = C.decode_jpeg_mmal(file_path.str, use_mmap)
+		result = C.decode_jpeg_mmal(file_path.str, use_mmap, false)
 	} else {
 		result = C.decode_jpeg_18k(file_path.str, use_mmap)
 	}

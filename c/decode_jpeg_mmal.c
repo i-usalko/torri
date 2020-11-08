@@ -166,7 +166,7 @@ static void display_port_format_info(MMAL_PORT_T *port)
 /**
  * Input file path -> Output RGB image
  */
-DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
+DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped, bool debug_info)
 {
    MMAL_STATUS_T status = MMAL_EINVAL;
    MMAL_COMPONENT_T *decoder = NULL;
@@ -228,10 +228,13 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
    _check_mmal(mmal_port_parameter_set_boolean(isp->output[0],
                                                 MMAL_PARAMETER_ZERO_COPY,
                                                 MMAL_FALSE));
-   /* Display the output port format */
-   display_port_format_info(decoder->output[0]);
-   /* Display the output port format */
-   display_port_format_info(isp->output[0]);
+   if (debug_info)
+   {
+      /* Display the output port format */
+      display_port_format_info(decoder->output[0]);
+      /* Display the output port format */
+      display_port_format_info(isp->output[0]);
+   }
 
    /* Create a queue to store our decoded frame(s). The callback we will get when
     * a frame has been decoded will put the frame into this queue. */
@@ -279,7 +282,10 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
    _check_mmal(mmal_connection_enable(conn_decoder_isp));
 
    /* Start decoding */
-   fprintf(stderr, "start decoding\n");
+   if (debug_info)
+   {
+      fprintf(stderr, "start decoding\n");
+   }
 
    /* This is the main processing loop */
    while(!eos_received && out_count < 10000)
@@ -375,7 +381,10 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
          }
          else
          {
-            fprintf(stderr, "decoded frame (flags %x, size %d) count %d\n", buffer->flags, buffer->length, out_count);
+            if (debug_info)
+            {
+               fprintf(stderr, "decoded frame (flags %x, size %d) count %d\n", buffer->flags, buffer->length, out_count);
+            }
             result->data = malloc(buffer->length);
             result->length = buffer->length;
             memcpy(result->data, buffer->data, buffer->length);
@@ -396,7 +405,10 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
    }
 
    /* Stop decoding */
-   fprintf(stderr, "stop decoding\n");
+   if (debug_info)
+   {
+      fprintf(stderr, "stop decoding\n");
+   }
 
    /* Stop everything. Not strictly necessary since mmal_component_destroy()
     * will do that anyway */
