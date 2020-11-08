@@ -1,5 +1,6 @@
 cimport cython
 
+from cython cimport view
 from typing import AnyStr
 from torri_wrapper cimport *
 from libc.stdlib cimport free
@@ -14,13 +15,20 @@ cdef class Torri(object):
         _file_path.is_lit = 0
         cdef bool _use_mmal = use_mmal
         cdef bool _use_mmap = use_mmap
-        # Resturn rgb image
+        # Resturn gbr24 image
         cdef const unsigned char * result = torri__decode_jpeg(_file_path, _use_mmal, _use_mmap)
-        cdef unsigned char[:] mview = <unsigned char[:width*height*3]> result
+        cdef view.array mview = view.array(shape=(height*width*3,), itemsize=8, format='b', mode='c', allocate_buffer=False)
+        mview.data = <char*> result
+        mview.callback_free_data = free
         return mview
 
     def free(self, allocated_mview):
+        cdef view.array as_view_array = <view.array>allocated_mview
+        # Soft request
         del allocated_mview
+        # print('Ok start free')
+        # free(as_view_array.data)
+        # print('Ok end free')
 
     def gencmd(self, cmd: str) -> str:
         cmd_bytes = cmd.encode('UTF-8')

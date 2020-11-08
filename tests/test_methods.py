@@ -65,6 +65,7 @@ class TestMethods(unittest.TestCase):
         obj = t.decode_jpeg('Not exist path!', 1920, 1080)
         print(obj)
         t.free(obj)
+        print('Ok it\'s free')
         print(obj)
         self.assertTrue(True)
 
