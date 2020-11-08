@@ -177,6 +177,7 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
    unsigned int in_count = 0, out_count = 0;
    MMAL_BUFFER_HEADER_T *buffer;
    DECODING_RESULT_T *result = malloc(sizeof(DECODING_RESULT_T));
+   result->length = 0;
 
    bcm_host_init();
    printf("OK1\n");
@@ -435,12 +436,12 @@ error:
    vcos_semaphore_delete(&context.semaphore);
    if (status != MMAL_SUCCESS)
    {
-      result->length = 0;
-      result->errors = "errors";
-      if (result->data)
+      if (result->length > 0)
       {
          free(result->data);
+         result->length = 0;
       }
+      result->errors = "errors";
    }
    return result;
 }
