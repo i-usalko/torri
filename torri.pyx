@@ -19,6 +19,9 @@ cdef class Torri(object):
         cdef unsigned char[:] mview = <unsigned char[:width*height*3]> result
         return mview
 
+    def free(self, allocated_mview):
+        del allocated_mview
+
     def gencmd(self, cmd: str) -> str:
         cmd_bytes = cmd.encode('UTF-8')
         cdef string v_string
