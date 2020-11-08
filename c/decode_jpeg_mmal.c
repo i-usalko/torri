@@ -180,14 +180,12 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
    result->length = 0;
 
    bcm_host_init();
-   printf("OK1\n");
 
 //   vcsm_init();
 
    vcos_semaphore_create(&context.semaphore, "example", 1);
 
    FILE *source_file = fopen(file_path, "rb");
-   printf("OK2\n");
    if (!source_file)
    {
       goto error;

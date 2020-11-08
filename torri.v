@@ -27,7 +27,7 @@ fn C.send_command(charptr) charptr
  * JPEG encoding/decoding
  */
 
-pub fn decode_jpeg(file_path string, use_mmal bool, use_mmap bool) []byte {
+pub fn decode_jpeg(file_path string, use_mmal bool, use_mmap bool) byteptr {
 	mut result := &C.DECODING_RESULT_T{}
 	if use_mmal {
 		result = C.decode_jpeg_mmal(file_path.str, use_mmap)
@@ -35,14 +35,12 @@ pub fn decode_jpeg(file_path string, use_mmal bool, use_mmap bool) []byte {
 		result = C.decode_jpeg_18k(file_path.str, use_mmap)
 	}
 	if isnil(result) {
-		return 'Returned result is : empty'.bytes()
+		return 'Returned result is : empty'.bytes().data
 	}
 	if int(result.length) > 0 {
-		mut bytepile := []byte{}
-		bytepile.insert_many(0, byteptr(result.data), int(result.length))
-		return bytepile
+		return byteptr(result.data)
 	}
-	return 'Returned result is : empty'.bytes()
+	return 'Returned result is : empty'.bytes().data
 }
 
 /** ***************************************************************************
