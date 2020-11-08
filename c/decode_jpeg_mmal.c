@@ -123,6 +123,7 @@ static MMAL_STATUS_T config_port(MMAL_PORT_T *port,
                                  const MMAL_FOURCC_T encoding,
                                  const int width, const int height)
 {
+   port->format->type = MMAL_ES_TYPE_VIDEO;
    port->format->encoding = encoding;
    port->format->es->video.width  = VCOS_ALIGN_UP(width,  32);
    port->format->es->video.height = VCOS_ALIGN_UP(height, 16);
@@ -202,7 +203,7 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
 
    // Setup decoder component
    _check_mmal(config_port(decoder->input[0],
-                           ENCODING_DECODER_IN, WIDTH, HEIGHT));
+                           ENCODING_DECODER_IN, 0, 0));
    _check_mmal(config_port(decoder->output[0],
                            ENCODING_DECODER_OUT, WIDTH, HEIGHT));
    //_check_mmal(mmal_port_parameter_set(decoder->output[0],
@@ -264,7 +265,7 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
 
    while ((buffer = mmal_queue_get(pool_out->queue)) != NULL)
    {
-      _check_mmal(mmal_port_send_buffer(decoder->output[0], buffer));
+      _check_mmal(mmal_port_send_buffer(isp->output[0], buffer));
    }
 
    /* Component won't start processing data until it is enabled. */
@@ -304,9 +305,7 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
 
          buffer->flags = buffer->length ? 0 : MMAL_BUFFER_HEADER_FLAG_EOS;
          buffer->pts = buffer->dts = MMAL_TIME_UNKNOWN;
-         //fprintf(stderr, "sending %i bytes\n", (int)buffer->length);
-         status = mmal_port_send_buffer(decoder->input[0], buffer);
-         CHECK_STATUS(status, "failed to send buffer");
+         _check_mmal(mmal_port_send_buffer(decoder->input[0], buffer));
          in_count++;
          //fprintf(stderr, "Input buffer %p to port %s. in_count %u\n", buffer, decoder->input[0]->name, in_count);
       }
@@ -353,7 +352,7 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
                mmal_port_pool_destroy(decoder->output[0], pool_out);
 
                status = mmal_format_full_copy(decoder->output[0]->format, event->format);
-               decoder->output[0]->format->encoding = MMAL_ENCODING_I420;
+               decoder->output[0]->format->encoding = ENCODING_DECODER_OUT;
                decoder->output[0]->buffer_num = MAX_BUFFERS;
                decoder->output[0]->buffer_size = decoder->output[0]->buffer_size_recommended;
 
@@ -376,9 +375,9 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
          else
          {
             fprintf(stderr, "decoded frame (flags %x, size %d) count %d\n", buffer->flags, buffer->length, out_count);
-            result->data = malloc(buffer->length);
-            result->length = buffer->length;
-            memcpy(result->data, buffer->data, buffer->length);
+            //result->data = malloc(buffer->length);
+            //result->length = buffer->length;
+            //memcpy(result->data, buffer->data, buffer->length);
 
             // Do something here with the content of the buffer
 
@@ -387,14 +386,12 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
             out_count++;
          }
       }
-   printf("OK16\n");
+      printf("OK16\n");
 
       /* Send empty buffers to the output port of the decoder */
       while ((buffer = mmal_queue_get(pool_out->queue)) != NULL)
       {
-         //printf("Sending buf %p\n", buffer);
-         status = mmal_port_send_buffer(decoder->output[0], buffer);
-         CHECK_STATUS(status, "failed to send output buffer to decoder");
+         _check_mmal(mmal_port_send_buffer(decoder->output[0], buffer));
       }
    }
 
@@ -403,24 +400,40 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
 
    /* Stop everything. Not strictly necessary since mmal_component_destroy()
     * will do that anyway */
-   mmal_port_disable(decoder->input[0]);
-   mmal_port_disable(decoder->output[0]);
-   mmal_component_disable(decoder);
+   _check_mmal(mmal_connection_disable(conn_decoder_isp));
+   _check_mmal(mmal_port_disable(decoder->input[0]));
+   _check_mmal(mmal_port_disable(decoder->output[0]));
+   _check_mmal(mmal_component_disable(decoder));
+   _check_mmal(mmal_port_disable(isp->input[0]));
+   _check_mmal(mmal_port_disable(isp->output[0]));
+   _check_mmal(mmal_component_disable(isp));
 
 error:
    /* Cleanup everything */
-   printf("OK-7\n");
+   printf("OK-8\n");
    if (pool_in)
+   {
       mmal_port_pool_destroy(decoder->input[0], pool_in);
-   printf("OK-6\n");
+   }
+   printf("OK-7\n");
    if (pool_out)
-      mmal_port_pool_destroy(decoder->output[0], pool_out);
+   {
+      mmal_port_pool_destroy(isp->output[0], pool_out);
+   }
+   printf("OK-6\n");
+   if (decoder)
+   {
+      mmal_component_destroy(decoder);
+   }
    printf("OK-5\n");
    if (decoder)
-      mmal_component_destroy(decoder);
+   {
+      mmal_component_destroy(isp);
+   }
    printf("OK-4\n");
-   if (context.queue)
+   if (context.queue) {
       mmal_queue_destroy(context.queue);
+   }
    printf("OK-3\n");
 
    if (source_file) {
