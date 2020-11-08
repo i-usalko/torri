@@ -6,6 +6,7 @@ module torri
 #flag @VROOT/c/gencmd.o
 #flag @VROOT/c/decode_jpeg_mmal.o
 #flag @VROOT/c/decode_jpeg_18k.o
+#flag @VROOT/c/read_file_with_mmap.o
 
 #include "gencmd.h"
 #include "decode_jpeg.h"
