@@ -17,7 +17,7 @@ cdef class Torri(object):
         cdef bool _use_mmap = use_mmap
         # Resturn gbr24 image
         cdef const unsigned char * result = torri__decode_jpeg(_file_path, _use_mmal, _use_mmap)
-        cdef view.array mview = view.array(shape=(height*width*3,), itemsize=8, format='b', mode='c', allocate_buffer=False)
+        cdef view.array mview = view.array(shape=(height*width*3,), itemsize=1, format='b', mode='c', allocate_buffer=False)
         mview.data = <char*> result
         mview.callback_free_data = free
         return mview
