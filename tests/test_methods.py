@@ -10,7 +10,7 @@ class TestMethods(unittest.TestCase):
 
     def test_case_one(self):
         t = Torri()
-        print(t.decode_jpeg('Not exist path!'))
+        print(t.decode_jpeg('Not exist path!', 1920, 1088))
         self.assertTrue(True)
 
     def test_case_two(self):
@@ -22,7 +22,7 @@ class TestMethods(unittest.TestCase):
     def test_case_three(self):
         time = timer()
         t = Torri()
-        data = t.decode_jpeg('/media/pi/Transcend/.mock-camera-images/2020-06-22-07-10-39.72866b38fcdb4b8ba0c76f2ba48d7c67-v.jpg')
+        data = t.decode_jpeg('/media/pi/Transcend/.mock-camera-images/2020-06-22-07-10-39.72866b38fcdb4b8ba0c76f2ba48d7c67-v.jpg', 1920, 1088)
         #width = 1920
         #height = 1088
         #size = width * height
