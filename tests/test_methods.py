@@ -69,6 +69,12 @@ class TestMethods(unittest.TestCase):
         print(obj)
         self.assertTrue(True)
 
+    def test_read_file_with_mmap(self):
+        t = Torri()
+        obj = t.read_file_with_mmap('Not exist path!')
+        print(obj)
+        self.assertTrue(True)
+
 
 if __name__ == '__main__':
     unittest.main()

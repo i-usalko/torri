@@ -2,6 +2,7 @@ cimport cython
 
 cdef extern from 'torri.h':
 	ctypedef bint bool
+	ctypedef unsigned int u32
 	ctypedef unsigned char * byteptr
 	ctypedef void * voidptr
 	struct string:
@@ -22,7 +23,13 @@ cdef extern from 'torri.h':
 		int ecode
 		void* data
 
+	struct torri__Blob:
+		unsigned char* data
+		u32 length
+		char* errors
+
 	ctypedef array array_byte
 
 	byteptr torri__decode_jpeg(string file_path, bool use_mmal, bool use_mmap)
 	string torri__gencmd(string cmd)
+	torri__Blob torri__read_file_with_mmap(string file_path)

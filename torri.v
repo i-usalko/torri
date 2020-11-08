@@ -23,6 +23,13 @@ fn C.decode_jpeg_mmal(charptr, bool, bool) &C.DECODING_RESULT_T
 fn C.decode_jpeg_18k(charptr, bool) &C.DECODING_RESULT_T
 fn C.send_command(charptr) charptr
 
+struct Blob {
+mut:
+	data byteptr
+	length u32
+	errors charptr
+}
+
 /** ***************************************************************************
  * JPEG encoding/decoding
  */
@@ -41,6 +48,17 @@ pub fn decode_jpeg(file_path string, use_mmal bool, use_mmap bool) byteptr {
 		return byteptr(result.data)
 	}
 	return 'Returned result is : empty'.bytes().data
+}
+
+/** ***************************************************************************
+ * Read file with mmap
+ */
+
+pub fn read_file_with_mmap(file_path string) Blob {
+	mut result := Blob{}
+	result.data = 'Returned result is : empty'.bytes().data
+	result.length = 26
+	return result
 }
 
 /** ***************************************************************************

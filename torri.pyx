@@ -15,10 +15,23 @@ cdef class Torri(object):
         _file_path.is_lit = 0
         cdef bool _use_mmal = use_mmal
         cdef bool _use_mmap = use_mmap
-        # Resturn gbr24 image
+        # Return gbr24 image
         cdef const unsigned char * result = torri__decode_jpeg(_file_path, _use_mmal, _use_mmap)
         cdef view.array mview = view.array(shape=(height*width*3,), itemsize=1, format='b', mode='c', allocate_buffer=False)
         mview.data = <char*> result
+        mview.callback_free_data = free
+        return mview
+
+    def read_file_with_mmap(self, file_path: str) -> AnyStr:
+        file_path_bytes = file_path.encode('UTF-8')
+        cdef string _file_path
+        _file_path.str = <char*>file_path_bytes
+        _file_path.len = len(file_path_bytes)
+        _file_path.is_lit = 0
+        # Return blob
+        cdef torri__Blob result = torri__read_file_with_mmap(_file_path)
+        cdef view.array mview = view.array(shape=(result.length,), itemsize=1, format='b', mode='c', allocate_buffer=False)
+        mview.data = <char*> result.data
         mview.callback_free_data = free
         return mview
 
