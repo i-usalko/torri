@@ -309,6 +309,7 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
          _check_mmal(mmal_port_send_buffer(decoder->input[0], buffer));
          in_count++;
          //fprintf(stderr, "Input buffer %p to port %s. in_count %u\n", buffer, decoder->input[0]->name, in_count);
+         printf("OK20\n");
       }
 
       /* Get our output frames */
@@ -330,7 +331,7 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
                if (event)
                {
                   fprintf(stderr, "----------Port format changed----------\n");
-                  log_format(decoder->output[0]->format, decoder->output[0]);
+                  log_format(isp->output[0]->format, isp->output[0]);
                   fprintf(stderr, "-----------------to---------------------\n");
                   log_format(event->format, 0);
                   fprintf(stderr, " buffers num (opt %i, min %i), size (opt %i, min: %i)\n",
@@ -339,7 +340,7 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
                   fprintf(stderr, "----------------------------------------\n");
                }
                mmal_buffer_header_release(buffer);
-               mmal_port_disable(decoder->output[0]);
+               mmal_port_disable(isp->output[0]);
 
                //Clear out the queue and release the buffers.
                while(mmal_queue_length(pool_out->queue) < pool_out->headers_num)
@@ -351,22 +352,22 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
 
                //Assume we can't reuse the output buffers, so have to disable, destroy
                //pool, create new pool, enable port, feed in buffers.
-               mmal_port_pool_destroy(decoder->output[0], pool_out);
+               mmal_port_pool_destroy(isp->output[0], pool_out);
 
-               status = mmal_format_full_copy(decoder->output[0]->format, event->format);
-               decoder->output[0]->format->encoding = ENCODING_DECODER_OUT;
-               decoder->output[0]->buffer_num = MAX_BUFFERS;
-               decoder->output[0]->buffer_size = decoder->output[0]->buffer_size_recommended;
+               status = mmal_format_full_copy(isp->output[0]->format, event->format);
+               isp->output[0]->format->encoding = ENCODING_DECODER_OUT;
+               isp->output[0]->buffer_num = MAX_BUFFERS;
+               isp->output[0]->buffer_size = decoder->output[0]->buffer_size_recommended;
 
                if (status == MMAL_SUCCESS)
-                  status = mmal_port_format_commit(decoder->output[0]);
+                  status = mmal_port_format_commit(isp->output[0]);
                if (status != MMAL_SUCCESS)
                {
                   fprintf(stderr, "commit failed on output - %d\n", status);
                }
 
-               mmal_port_enable(decoder->output[0], output_callback);
-               pool_out = mmal_port_pool_create(decoder->output[0], decoder->output[0]->buffer_num, decoder->output[0]->buffer_size);
+               mmal_port_enable(isp->output[0], output_callback);
+               pool_out = mmal_port_pool_create(isp->output[0], isp->output[0]->buffer_num, isp->output[0]->buffer_size);
             }
             else
             {
@@ -387,6 +388,7 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
 
             out_count++;
          }
+         printf("OK19\n");
       }
       printf("OK16\n");
 
