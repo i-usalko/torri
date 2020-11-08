@@ -34,18 +34,14 @@ pub fn decode_jpeg(file_path string, use_mmal bool, use_mmap bool) []byte {
 	} else {
 		result = C.decode_jpeg_18k(file_path.str, use_mmap)
 	}
-	println('torri-ok1')
 	if isnil(result) {
 		return 'Returned result is : empty'.bytes()
 	}
-	println('torri-ok2')
-	if result.length > 0 {
+	if int(result.length) > 0 {
 		mut bytepile := []byte{}
 		bytepile.insert_many(0, byteptr(result.data), int(result.length))
-		println('torri-ok4')
 		return bytepile
 	}
-	println('torri-ok3')
 	return 'Returned result is : empty'.bytes()
 }
 
@@ -56,7 +52,7 @@ pub fn decode_jpeg(file_path string, use_mmal bool, use_mmap bool) []byte {
 pub fn gencmd(cmd string) string {
 	result := C.send_command(cmd.str)
 	if !isnil(result) {
-		return string(result)
+		return cstring_to_vstring(result)
 	}
 	return 'Returned result is : empty'
 }

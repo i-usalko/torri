@@ -3,7 +3,7 @@
 
 #define _check_mmal(x) \
     do { \
-        MMAL_STATUS_T status = (x); \
+        status = (x); \
         if (status != MMAL_SUCCESS) { \
             fprintf(stderr, "%s:%d: %s: %s (0x%08x)\n", __FILE__, __LINE__, #x, mmal_status_to_string(status), status); \
             goto error; \
@@ -309,7 +309,6 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
          _check_mmal(mmal_port_send_buffer(decoder->input[0], buffer));
          in_count++;
          //fprintf(stderr, "Input buffer %p to port %s. in_count %u\n", buffer, decoder->input[0]->name, in_count);
-         printf("OK20\n");
       }
 
       /* Get our output frames */
@@ -388,9 +387,7 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
 
             out_count++;
          }
-         printf("OK19\n");
       }
-      printf("OK16\n");
 
       /* Send empty buffers to the output port of the decoder */
       while ((buffer = mmal_queue_get(pool_out->queue)) != NULL)
@@ -412,42 +409,38 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
 
 error:
    /* Cleanup everything */
-   printf("OK-8\n");
    if (pool_in)
    {
       mmal_port_pool_destroy(decoder->input[0], pool_in);
    }
-   printf("OK-7\n");
    if (pool_out)
    {
       mmal_port_pool_destroy(isp->output[0], pool_out);
    }
-   printf("OK-6\n");
    if (decoder)
    {
       mmal_component_destroy(decoder);
    }
-   printf("OK-5\n");
    if (decoder)
    {
       mmal_component_destroy(isp);
    }
-   printf("OK-4\n");
    if (context.queue) {
       mmal_queue_destroy(context.queue);
    }
-   printf("OK-3\n");
 
    if (source_file) {
       fclose(source_file);
    }
-   printf("OK-2\n");
    vcos_semaphore_delete(&context.semaphore);
    if (status != MMAL_SUCCESS)
    {
       result->length = 0;
       result->errors = "errors";
+      if (result->data)
+      {
+         free(result->data);
+      }
    }
-   printf("OK-1\n");
    return result;
 }
