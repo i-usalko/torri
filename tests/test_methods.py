@@ -60,6 +60,14 @@ class TestMethods(unittest.TestCase):
 
         self.assertTrue(True)
 
+    def test_case_del(self):
+        t = Torri()
+        obj = t.decode_jpeg('Not exist path!', 1920, 1080)
+        print(obj)
+        t.free(obj)
+        print(obj)
+        self.assertTrue(True)
+
 
 if __name__ == '__main__':
     unittest.main()
