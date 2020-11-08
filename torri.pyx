@@ -15,9 +15,7 @@ cdef class Torri(object):
         cdef bool _use_mmal = use_mmal
         cdef bool _use_mmap = use_mmap
         result = torri__decode_jpeg(_file_path, _use_mmal, _use_mmap)
-        cdef bytes py_bytes_string
-        py_bytes_string = memoryview(<unsigned char*>result)
-        return py_bytes_string
+        return memoryview(<unsigned char*>result)
 
     def gencmd(self, cmd: str) -> str:
         cmd_bytes = cmd.encode('UTF-8')
