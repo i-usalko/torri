@@ -393,7 +393,7 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped)
       /* Send empty buffers to the output port of the decoder */
       while ((buffer = mmal_queue_get(pool_out->queue)) != NULL)
       {
-         _check_mmal(mmal_port_send_buffer(decoder->output[0], buffer));
+         _check_mmal(mmal_port_send_buffer(isp->output[0], buffer));
       }
    }
 
