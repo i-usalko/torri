@@ -43,7 +43,7 @@ typedef struct torri__Blob {
 
 typedef array array_byte;
 
-extern torri__Blob torri__decode_jpeg(string file_path, bool use_mmal, bool use_mmap);
+extern torri__Blob torri__decode_jpeg(string file_path, int32_t width, int32_t height, bool use_mmal, bool use_mmap);
 extern string torri__gencmd(string cmd);
 extern torri__Blob torri__read_file_with_mmap(string file_path);
 

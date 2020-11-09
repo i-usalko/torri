@@ -19,7 +19,7 @@ cdef class Torri(object):
         cdef bool _use_mmal = use_mmal
         cdef bool _use_mmap = use_mmap
         # Return gbr24 image Blob
-        cdef torri__Blob result = torri__decode_jpeg(_file_path, _use_mmal, _use_mmap)
+        cdef torri__Blob result = torri__decode_jpeg(_file_path, width, height, _use_mmal, _use_mmap)
         cdef bytes py_bytes_errors
 
         if result.length < 0:

@@ -161,9 +161,6 @@ static void display_port_format_info(MMAL_PORT_T *port)
 #define ENCODING_DECODER_IN MMAL_ENCODING_JPEG
 #define ENCODING_DECODER_OUT MMAL_ENCODING_I422
 #define ENCODING_ISP_OUT    MMAL_ENCODING_BGR24
-#define WIDTH  1920
-#define HEIGHT 1080
-#define ZERO_COPY 0
 
 #define MIN(a, b) \
   ({ __typeof__(a) _a = (a); \
@@ -173,7 +170,7 @@ static void display_port_format_info(MMAL_PORT_T *port)
 /**
  * Input file path -> Output RGB image
  */
-DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool use_mmap, bool debug_info)
+DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, int32_t width, int32_t height, bool use_mmap, bool debug_info)
 {
    MMAL_STATUS_T status = MMAL_EINVAL;
    MMAL_COMPONENT_T *decoder = NULL;
@@ -232,7 +229,7 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool use_mmap, bool debug_i
    _check_mmal(config_port(decoder->input[0],
                            ENCODING_DECODER_IN, 0, 0));
    _check_mmal(config_port(decoder->output[0],
-                           ENCODING_DECODER_OUT, WIDTH, HEIGHT));
+                           ENCODING_DECODER_OUT, width, height));
    //_check_mmal(mmal_port_parameter_set(decoder->output[0],
    //                                    &source_pattern.hdr));
    _check_mmal(mmal_port_parameter_set_boolean(decoder->output[0],
@@ -245,9 +242,9 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool use_mmap, bool debug_i
    _check_mmal(mmal_component_create("vc.ril.isp", &isp));
    _check_mmal(mmal_port_enable(isp->control, control_callback));
    _check_mmal(config_port(isp->input[0],
-                           ENCODING_DECODER_OUT, WIDTH, HEIGHT));
+                           ENCODING_DECODER_OUT, width, height));
    _check_mmal(config_port(isp->output[0],
-                           ENCODING_ISP_OUT, WIDTH, HEIGHT));
+                           ENCODING_ISP_OUT, width, height));
    _check_mmal(mmal_port_enable(isp->output[0], output_callback));
    _check_mmal(mmal_port_parameter_set_boolean(isp->input[0],
                                                 MMAL_PARAMETER_ZERO_COPY,
