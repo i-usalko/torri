@@ -24,7 +24,7 @@ struct C.DECODING_RESULT_T {
 [typedef]
 struct C.READING_RESULT_T {
 	data voidptr
-	length u32
+	length int
 	errors charptr
 }
 
@@ -36,7 +36,7 @@ fn C.read_file(charptr) &C.READING_RESULT_T
 struct Blob {
 mut:
 	data byteptr
-	length u32
+	length int
 	errors charptr
 }
 

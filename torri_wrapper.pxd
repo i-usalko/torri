@@ -2,7 +2,6 @@ cimport cython
 
 cdef extern from 'torri.h':
 	ctypedef bint bool
-	ctypedef unsigned int u32
 	ctypedef unsigned char * byteptr
 	ctypedef void * voidptr
 	struct string:
@@ -25,7 +24,7 @@ cdef extern from 'torri.h':
 
 	struct torri__Blob:
 		unsigned char* data
-		u32 length
+		int length
 		char* errors
 
 	ctypedef array array_byte

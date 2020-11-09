@@ -7,6 +7,7 @@
 typedef void* voidptr;
 typedef unsigned char* byteptr;
 typedef uint32_t u32;
+typedef int32_t i32;
 typedef char* charptr;
 
 typedef struct string string;
@@ -36,7 +37,7 @@ struct Option_string {
 
 typedef struct torri__Blob {
 	byteptr data;
-	u32 length;
+	i32 length;
 	charptr errors;
 } torri__Blob;
 
