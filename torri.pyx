@@ -30,7 +30,7 @@ cdef class Torri(object):
         _file_path.is_lit = 0
         # Return blob
         cdef torri__Blob result = torri__read_file_with_mmap(_file_path)
-        cdef signed int blob_length = result.length
+        cdef unsigned int blob_length = result.length
         cdef view.array mview = view.array(shape=(blob_length,), itemsize=1, format='b', mode='c', allocate_buffer=False)
         mview.data = <char*> result.data
         mview.callback_free_data = free
