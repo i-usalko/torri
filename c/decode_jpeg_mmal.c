@@ -335,9 +335,9 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool use_mmap, bool debug_i
          printf("OK 21 read bytes %d, not_read_bytes %d, s.st_size is %d\n", read_bytes, not_read_bytes, s.st_size);
          if (read_bytes > 0)
          {
-            not_read_bytes -= read_bytes;
             memcpy(buffer->data, mapped + (s.st_size - not_read_bytes), read_bytes);
             buffer->length = read_bytes;
+            not_read_bytes -= read_bytes;
          }
          else {
             buffer->length = 0;
