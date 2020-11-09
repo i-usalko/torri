@@ -3,6 +3,6 @@
 READING_RESULT_T* read_file(char *file_path)
 {
     READING_RESULT_T *result = malloc(sizeof(READING_RESULT_T));
-
+    result->length = 0;
     return result;
 }
