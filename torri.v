@@ -68,11 +68,15 @@ pub fn read_file_with_mmap(file_path string) Blob {
 	mut blob := Blob{}
 	mut result := C.read_file(file_path.str)
 	if isnil(result) {
+		blob.length = -1
 		blob.errors = 'Returned result is : empty'.bytes().data
 	}
 	if int(result.length) > 0 {
 		blob.data = byteptr(result.data)
+	} else if int(result.length) < 0 {
+		blob.errors = charptr(result.errors)
 	}
+
 	blob.length = result.length
 	return blob
 }

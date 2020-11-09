@@ -3,7 +3,7 @@
 READING_RESULT_T* read_file(char *file_path)
 {
     READING_RESULT_T *result = malloc(sizeof(READING_RESULT_T));
-    result->length = 0;
+    result->length = -1;
 
     int fd;
     struct stat s;
@@ -38,8 +38,8 @@ READING_RESULT_T* read_file(char *file_path)
     {
         free(result->data);
         result->errors = strerror(errno);
+        result->length = -1;
         return result;
     }
-
     return result;
 }
