@@ -10,8 +10,9 @@ class TestMethods(unittest.TestCase):
 
     def test_case_one(self):
         t = Torri()
-        print(t.decode_jpeg('Not exist path!', 1920, 1080))
-        self.assertTrue(True)
+        with self.assertRaises(TorriException):
+            obj = t.read_file_with_mmap('Not exist path!')
+            print(obj)
 
     def test_case_two(self):
         t = Torri()
@@ -72,7 +73,7 @@ class TestMethods(unittest.TestCase):
     def test_read_file_with_mmap(self):
         t = Torri()
         with self.assertRaises(TorriException):
-            obj = t.read_file_with_mmap('Not exist path!')
+            obj = t.read_file_with_mmap('Not exist path!', use_mmap=True)
             print(obj)
 
     @unittest.skip  # Manual run only
