@@ -29,6 +29,6 @@ cdef extern from 'torri.h':
 
 	ctypedef array array_byte
 
-	byteptr torri__decode_jpeg(string file_path, bool use_mmal, bool use_mmap)
+	torri__Blob torri__decode_jpeg(string file_path, bool use_mmal, bool use_mmap)
 	string torri__gencmd(string cmd)
 	torri__Blob torri__read_file_with_mmap(string file_path)

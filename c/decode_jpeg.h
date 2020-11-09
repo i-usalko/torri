@@ -5,7 +5,7 @@
 
 typedef struct DECODING_RESULT_T {
     void* data;
-    uint32_t length;
+    int32_t length;
     char* errors;
 } DECODING_RESULT_T;
 

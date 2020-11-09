@@ -17,7 +17,7 @@ module torri
 [typedef]
 struct C.DECODING_RESULT_T {
 	data voidptr
-	length u32
+	length int
 	errors charptr
 }
 
@@ -44,7 +44,8 @@ mut:
  * JPEG encoding/decoding
  */
 
-pub fn decode_jpeg(file_path string, use_mmal bool, use_mmap bool) byteptr {
+pub fn decode_jpeg(file_path string, use_mmal bool, use_mmap bool) Blob {
+	mut blob := Blob{}
 	mut result := &C.DECODING_RESULT_T{}
 	if use_mmal {
 		result = C.decode_jpeg_mmal(file_path.str, use_mmap, false)
@@ -52,12 +53,18 @@ pub fn decode_jpeg(file_path string, use_mmal bool, use_mmap bool) byteptr {
 		result = C.decode_jpeg_18k(file_path.str, use_mmap)
 	}
 	if isnil(result) {
-		return 'Returned result is : empty'.bytes().data
+		blob.length = -1
+		blob.errors = 'Returned result is : empty'.bytes().data
 	}
 	if int(result.length) > 0 {
-		return byteptr(result.data)
+		blob.data = byteptr(result.data)
+	} else if int(result.length) < 0 {
+		errors := cstring_to_vstring(result.errors)
+		blob.errors = charptr(errors.str)
 	}
-	return 'Returned result is : empty'.bytes().data
+
+	blob.length = result.length
+	return blob
 }
 
 /** ***************************************************************************

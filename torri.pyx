@@ -18,10 +18,22 @@ cdef class Torri(object):
         _file_path.is_lit = 0
         cdef bool _use_mmal = use_mmal
         cdef bool _use_mmap = use_mmap
-        # Return gbr24 image
-        cdef const unsigned char * result = torri__decode_jpeg(_file_path, _use_mmal, _use_mmap)
-        cdef view.array mview = view.array(shape=(height*width*3,), itemsize=1, format='b', mode='c', allocate_buffer=False)
-        mview.data = <char*> result
+        # Return gbr24 image Blob
+        cdef torri__Blob result = torri__decode_jpeg(_file_path, _use_mmal, _use_mmap)
+        cdef bytes py_bytes_errors
+
+        if result.length < 0:
+            try:
+                py_bytes_errors = (<char*>result.errors)[:]
+                raise TorriException(py_bytes_errors.decode('UTF-8'))
+            finally:
+                free(<void*>result.errors)
+
+        if result.length == 0:
+            return b''
+
+        cdef view.array mview = view.array(shape=(result.length,), itemsize=1, format='b', mode='c', allocate_buffer=False)
+        mview.data = <char*> result.data
         mview.callback_free_data = free
         return mview
 

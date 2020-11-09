@@ -201,20 +201,19 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool use_mmap, bool debug_i
    fd = open(file_path, O_RDONLY);
    if (fd < 0)
    {
-      status = MMAL_ECORRUPT;
+      status = MMAL_ENOENT;
       goto error;
    }
 
    if (fstat(fd, &s) < 0)
    {
-      status = MMAL_ECORRUPT;
+      status = MMAL_ENOENT;
       goto error;
    }
 
    mapped = mmap(0, s.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
    if (mapped == MAP_FAILED)
    {
-      status = MMAL_ECORRUPT;
       goto error;
    }
    not_read_bytes = s.st_size;
@@ -494,7 +493,8 @@ error:
          free(result->data);
          result->length = 0;
       }
-      result->errors = "errors";
+      result->errors = malloc(strlen("errors"));
+      memcpy(result->errors, "errors", strlen("errors"));
    }
    return result;
 }
