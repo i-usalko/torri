@@ -128,8 +128,8 @@ static MMAL_STATUS_T config_port(MMAL_PORT_T *port,
 {
    port->format->type = MMAL_ES_TYPE_VIDEO;
    port->format->encoding = encoding;
-   port->format->es->video.width  = VCOS_ALIGN_UP(width,  32);
-   port->format->es->video.height = VCOS_ALIGN_UP(height, 16);
+   port->format->es->video.width  = width;  // VCOS_ALIGN_UP(width,  32);
+   port->format->es->video.height = height; // VCOS_ALIGN_UP(height, 16);
    port->format->es->video.crop.x = 0;
    port->format->es->video.crop.y = 0;
    port->format->es->video.crop.width  = width;

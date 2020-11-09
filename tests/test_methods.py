@@ -20,10 +20,10 @@ class TestMethods(unittest.TestCase):
         self.assertTrue(True)
 
     @unittest.skip  # Manual run only
-    def test_case_three(self):
+    def test_case_read_without_mmap(self):
         t = Torri()
         time = timer()
-        data = t.decode_jpeg('/media/pi/Transcend/.mock-camera-images/2020-06-22-07-10-39.72866b38fcdb4b8ba0c76f2ba48d7c67-v.jpg', 1920, 1080)
+        data = t.decode_jpeg('/media/pi/Transcend/.mock-camera-images/2020-06-22-07-10-39.72866b38fcdb4b8ba0c76f2ba48d7c67-v.jpg', 1920, 1080, use_mmap=False)
         print(f'Execution time decoding is {timer() - time}s')
         #width = 1920
         #height = 1080
@@ -43,7 +43,7 @@ class TestMethods(unittest.TestCase):
         self.assertTrue(True)
 
     @unittest.skip  # Manual run only
-    def test_case_four(self):
+    def test_case_control(self):
         time = timer()
         with open('/media/pi/Transcend/.mock-camera-images/2020-06-22-07-10-39.72866b38fcdb4b8ba0c76f2ba48d7c67-v.jpg', 'rb') as reader:
             image_data = np.frombuffer(reader.read(), dtype=np.uint8)
@@ -79,7 +79,9 @@ class TestMethods(unittest.TestCase):
     @unittest.skip  # Manual run only
     def test_read_file_with_mmap(self):
         t = Torri()
+        time = timer()
         obj = t.read_file_with_mmap('/media/pi/Transcend/.mock-camera-images/2020-06-22-07-10-39.72866b38fcdb4b8ba0c76f2ba48d7c67-v.jpg')
+        print(f'Execution time read with mmap is {timer() - time}s')
         print(obj)
         self.assertTrue(True)
 
