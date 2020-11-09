@@ -13,20 +13,26 @@ READING_RESULT_T* read_file(char *file_path)
     fd = open(file_path, O_RDONLY);
     if (fd < 0)
     {
-        result->errors = strerror(errno);
+        char * error = strerror(errno);
+        result->errors = malloc(strlen(error));
+        memcpy(result->errors, error, strlen(error));
         return result;
     }
 
     if (fstat(fd, &s) < 0)
     {
-        result->errors = strerror(errno);
+        char * error = strerror(errno);
+        result->errors = malloc(strlen(error));
+        memcpy(result->errors, error, strlen(error));
         return result;
     }
 
     mapped = mmap(0, s.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
     if (mapped == MAP_FAILED)
     {
-        result->errors = strerror(errno);
+        char * error = strerror(errno);
+        result->errors = malloc(strlen(error));
+        memcpy(result->errors, error, strlen(error));
         return result;
     }
 
@@ -37,7 +43,9 @@ READING_RESULT_T* read_file(char *file_path)
     if (munmap(mapped , s.st_size) < 0)
     {
         free(result->data);
-        result->errors = strerror(errno);
+        char * error = strerror(errno);
+        result->errors = malloc(strlen(error));
+        memcpy(result->errors, error, strlen(error));
         result->length = -1;
         return result;
     }

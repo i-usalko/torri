@@ -74,7 +74,8 @@ pub fn read_file_with_mmap(file_path string) Blob {
 	if int(result.length) > 0 {
 		blob.data = byteptr(result.data)
 	} else if int(result.length) < 0 {
-		blob.errors = charptr(result.errors)
+		errors := cstring_to_vstring(result.errors)
+		blob.errors = charptr(errors.str)
 	}
 
 	blob.length = result.length
