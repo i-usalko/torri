@@ -1,6 +1,6 @@
 import os
 import unittest
-from torri import Torri
+from torri import Torri, TorriException
 from timeit import default_timer as timer
 from cv2 import cv2
 import numpy as  np
@@ -69,6 +69,13 @@ class TestMethods(unittest.TestCase):
         print(obj)
         self.assertTrue(True)
 
+    def test_read_file_with_mmap(self):
+        t = Torri()
+        with self.assertRaises(TorriException):
+            obj = t.read_file_with_mmap('Not exist path!')
+            print(obj)
+
+    @unittest.skip  # Manual run only
     def test_read_file_with_mmap(self):
         t = Torri()
         obj = t.read_file_with_mmap('/media/pi/Transcend/.mock-camera-images/2020-06-22-07-10-39.72866b38fcdb4b8ba0c76f2ba48d7c67-v.jpg')

@@ -5,6 +5,9 @@ from typing import AnyStr
 from torri_wrapper cimport *
 from libc.stdlib cimport free
 
+cdef class TorriException(Exception):
+    pass
+
 cdef class Torri(object):
 
     def decode_jpeg(self, file_path: str, width: int, height: int, use_mmal: bool = True, use_mmap: bool = False) -> AnyStr:
@@ -35,7 +38,7 @@ cdef class Torri(object):
         if result.length < 0:
             try:
                 py_bytes_errors = (<char*>result.errors)[:]
-                raise Exception(py_bytes_errors.decode('UTF-8'))
+                raise TorriException(py_bytes_errors.decode('UTF-8'))
             finally:
                 free(<void*>result.errors)
 
