@@ -8,7 +8,6 @@ READING_RESULT_T* read_file(char *file_path)
     int fd;
     struct stat s;
     const char * mapped;
-    int i;
 
     fd = open(file_path, O_RDONLY);
     if (fd < 0)
@@ -16,7 +15,7 @@ READING_RESULT_T* read_file(char *file_path)
         char * error = strerror(errno);
         result->errors = malloc(strlen(error));
         memcpy(result->errors, error, strlen(error));
-	close(fd);
+	    close(fd);
         return result;
     }
 
@@ -25,7 +24,7 @@ READING_RESULT_T* read_file(char *file_path)
         char * error = strerror(errno);
         result->errors = malloc(strlen(error));
         memcpy(result->errors, error, strlen(error));
-	close(fd);
+	    close(fd);
         return result;
     }
 
@@ -35,7 +34,7 @@ READING_RESULT_T* read_file(char *file_path)
         char * error = strerror(errno);
         result->errors = malloc(strlen(error));
         memcpy(result->errors, error, strlen(error));
-	close(fd);
+	    close(fd);
         return result;
     }
 
@@ -50,7 +49,7 @@ READING_RESULT_T* read_file(char *file_path)
         result->errors = malloc(strlen(error));
         memcpy(result->errors, error, strlen(error));
         result->length = -1;
-	close(fd);
+	    close(fd);
         return result;
     }
     close(fd);

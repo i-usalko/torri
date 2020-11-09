@@ -79,6 +79,6 @@ static struct CONTEXT_T {
    MMAL_STATUS_T status;
 } context;
 
-DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped, bool debug_info);
+DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool use_mmap, bool debug_info);
 
 #endif  // DECODE_JPEG_MMAL_H

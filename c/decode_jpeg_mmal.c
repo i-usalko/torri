@@ -166,7 +166,7 @@ static void display_port_format_info(MMAL_PORT_T *port)
 /**
  * Input file path -> Output RGB image
  */
-DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped, bool debug_info)
+DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool use_mmap, bool debug_info)
 {
    MMAL_STATUS_T status = MMAL_EINVAL;
    MMAL_COMPONENT_T *decoder = NULL;
@@ -181,14 +181,27 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped, bool debug_inf
 
    bcm_host_init();
 
-//   vcsm_init();
-
    vcos_semaphore_create(&context.semaphore, "example", 1);
 
 
+   /* Open file */
+   int fd;
+   struct stat s;
+   const char * mapped;
 
-   FILE *source_file = fopen(file_path, "rb");
-   if (!source_file)
+   fd = open(file_path, O_RDONLY);
+   if (fd < 0)
+   {
+      goto error;
+   }
+
+   if (fstat(fd, &s) < 0)
+   {
+      goto error;
+   }
+
+   mapped = mmap(0, s.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+   if (mapped == MAP_FAILED)
    {
       goto error;
    }
@@ -306,10 +319,16 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool mmaped, bool debug_inf
       /* Send data to decode to the input port of the video decoder */
       if (!eos_sent && (buffer = mmal_queue_get(pool_in->queue)) != NULL)
       {
-         buffer->length = fread(buffer->data, 1, buffer->alloc_size - 128, source_file);
+         if (buffer->alloc_size - 128 > s.st_size) {
+            goto error;
+         }
+         memcpy(buffer->data, mapped, s.st_size);
+         buffer->length = s.st_size;
          buffer->offset = 0;
 
-         if(!buffer->length) eos_sent = MMAL_TRUE;
+         if(!buffer->length) {
+            eos_sent = MMAL_TRUE;
+         }
 
          buffer->flags = buffer->length ? 0 : MMAL_BUFFER_HEADER_FLAG_EOS;
          buffer->pts = buffer->dts = MMAL_TIME_UNKNOWN;
@@ -442,8 +461,9 @@ error:
       mmal_queue_destroy(context.queue);
    }
 
-   if (source_file) {
-      fclose(source_file);
+   if (mapped) {
+      munmap(mapped, s.st_size);
+      close(fd);
    }
    vcos_semaphore_delete(&context.semaphore);
    if (status != MMAL_SUCCESS)
