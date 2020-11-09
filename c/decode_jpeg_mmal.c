@@ -191,7 +191,7 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, int32_t width, int32_t heig
    /* Open file */
    int fd;
    struct stat s;
-   const char * mapped;
+   const char * file_buffer;
    int not_read_bytes;
    int read_bytes;
 
@@ -208,10 +208,18 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, int32_t width, int32_t heig
       goto error;
    }
 
-   mapped = mmap(0, s.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
-   if (mapped == MAP_FAILED)
+   if (!use_mmap)
    {
-      goto error;
+      file_buffer = malloc(s.st_size);
+      read(fd, file_buffer, s.st_size);
+   }
+   else
+   {
+      file_buffer = mmap(0, s.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+      if (file_buffer == MAP_FAILED)
+      {
+         goto error;
+      }
    }
    not_read_bytes = s.st_size;
 
@@ -334,7 +342,7 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, int32_t width, int32_t heig
          // printf("OK 21 read bytes %d, not_read_bytes %d, s.st_size is %d\n", read_bytes, not_read_bytes, s.st_size);
          if (read_bytes > 0)
          {
-            memcpy(buffer->data, mapped + (s.st_size - not_read_bytes), read_bytes);
+            memcpy(buffer->data, file_buffer + (s.st_size - not_read_bytes), read_bytes);
             buffer->length = read_bytes;
             not_read_bytes -= read_bytes;
          }
@@ -478,8 +486,15 @@ error:
       mmal_queue_destroy(context.queue);
    }
 
-   if (mapped) {
-      munmap(mapped, s.st_size);
+   if (file_buffer) {
+      if (!use_mmap)
+      {
+         free(file_buffer);
+      }
+      else
+      {
+         munmap(file_buffer, s.st_size);
+      }
       close(fd);
    }
    vcos_semaphore_delete(&context.semaphore);
