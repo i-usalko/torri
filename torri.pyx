@@ -30,6 +30,13 @@ cdef class Torri(object):
         _file_path.is_lit = 0
         # Return blob
         cdef torri__Blob result = torri__read_file_with_mmap(_file_path)
+        cdef bytes py_bytes_errors
+        if result.length == 0 and result.errors:
+            try:
+                py_bytes_errors = (<char*>result.errors)[:]
+                raise Exception(py_bytes_errors.decode('UTF-8'))
+            finally:
+                free(<void*>result.errors)
         cdef view.array mview = view.array(shape=(result.length,), itemsize=1, format='b', mode='c', allocate_buffer=False)
         mview.data = <char*> result.data
         mview.callback_free_data = free
