@@ -329,15 +329,19 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool use_mmap, bool debug_i
       /* Send data to decode to the input port of the video decoder */
       if (!eos_sent && (buffer = mmal_queue_get(pool_in->queue)) != NULL)
       {
+         // buffer->length = fread(buffer->data, 1, buffer->alloc_size - 128, source_file);
+
          read_bytes = MIN(not_read_bytes, buffer->alloc_size - 128);
          if (read_bytes > 0)
          {
+            printf("OK 21 read bytes %d", read_bytes);
             not_read_bytes -= read_bytes;
             memcpy(buffer->data, mapped, read_bytes);
             buffer->length = read_bytes;
          }
          else {
-            buffer->length = -1;
+            printf("OK 21 read bytes %d", read_bytes);
+            buffer->length = 0;
          }
          buffer->offset = 0;
 
