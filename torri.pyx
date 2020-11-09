@@ -25,7 +25,7 @@ cdef class Torri(object):
         if result.length < 0:
             try:
                 py_bytes_errors = (<char*>result.errors)[:]
-                raise TorriException(py_bytes_errors.decode('UTF-8'))
+                raise TorriException(py_bytes_errors.decode('ascii'))
             finally:
                 free(<void*>result.errors)
 
