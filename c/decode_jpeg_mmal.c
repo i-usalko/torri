@@ -77,10 +77,12 @@ static void control_callback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_T *buffer)
    switch (buffer->cmd)
    {
    case MMAL_EVENT_EOS:
+      printf("OK19\n");
       /* Only sink component generate EOS events */
       break;
    case MMAL_EVENT_ERROR:
       /* Something went wrong. Signal this to the application */
+      printf("OK20\n");
       ctx->status = *(MMAL_STATUS_T *)buffer->data;
       break;
    default:
@@ -328,9 +330,15 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool use_mmap, bool debug_i
       if (!eos_sent && (buffer = mmal_queue_get(pool_in->queue)) != NULL)
       {
          read_bytes = MIN(not_read_bytes, buffer->alloc_size - 128);
-         not_read_bytes -= read_bytes;
-         memcpy(buffer->data, mapped, read_bytes);
-         buffer->length = read_bytes;
+         if (read_bytes > 0)
+         {
+            not_read_bytes -= read_bytes;
+            memcpy(buffer->data, mapped, read_bytes);
+            buffer->length = read_bytes;
+         }
+         else {
+            buffer->length = -1;
+         }
          buffer->offset = 0;
 
          if(!buffer->length) {
