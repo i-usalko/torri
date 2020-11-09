@@ -163,6 +163,11 @@ static void display_port_format_info(MMAL_PORT_T *port)
 #define HEIGHT 1080
 #define ZERO_COPY 0
 
+#define MIN(a, b) \
+  ({ __typeof__(a) _a = (a); \
+     __typeof__(b) _b = (b); \
+     _a < _b ? _a: _b; })
+
 /**
  * Input file path -> Output RGB image
  */
@@ -188,6 +193,8 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool use_mmap, bool debug_i
    int fd;
    struct stat s;
    const char * mapped;
+   int not_read_bytes;
+   int read_bytes;
 
    fd = open(file_path, O_RDONLY);
    if (fd < 0)
@@ -205,6 +212,7 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool use_mmap, bool debug_i
    {
       goto error;
    }
+   not_read_bytes = s.st_size;
 
    /* Create the decoder component.
     * This specific component exposes 2 ports (1 input and 1 output). Like most components
@@ -319,11 +327,10 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool use_mmap, bool debug_i
       /* Send data to decode to the input port of the video decoder */
       if (!eos_sent && (buffer = mmal_queue_get(pool_in->queue)) != NULL)
       {
-         if (buffer->alloc_size - 128 > s.st_size) {
-            goto error;
-         }
-         memcpy(buffer->data, mapped, s.st_size);
-         buffer->length = s.st_size;
+         read_bytes = MIN(not_read_bytes, buffer->alloc_size - 128);
+         not_read_bytes -= read_bytes;
+         memcpy(buffer->data, mapped, read_bytes);
+         buffer->length = read_bytes;
          buffer->offset = 0;
 
          if(!buffer->length) {
