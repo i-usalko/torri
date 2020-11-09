@@ -82,6 +82,26 @@ class TestMethods(unittest.TestCase):
         print(obj)
         self.assertTrue(True)
 
+    @unittest.skip  # Manual run only
+    def test_case_mmal_and_mmap(self):
+        t = Torri()
+        time = timer()
+        data = t.decode_jpeg('/media/pi/Transcend/.mock-camera-images/2020-06-22-07-10-39.72866b38fcdb4b8ba0c76f2ba48d7c67-v.jpg', 1920, 1080, use_mmap=True)
+        print(f'Execution time decoding is {timer() - time}s')
+        gbr24_data = np.array(data, copy=False, dtype=np.uint8)
+        gbr24_data = gbr24_data.reshape((1080, 1920, 3))
+        print(f'Execution time total is {timer() - time}s')
+
+        success, image_byte_array = cv2.imencode('.jpeg',
+                                                gbr24_data,
+                                                [cv2.IMWRITE_JPEG_QUALITY, 100])
+        with open('test-mmal-and-mmap.jpeg', 'wb') as writer:
+            writer.write(image_byte_array)
+            writer.flush()
+            os.fsync(writer.fileno())
+
+        self.assertTrue(True)
+
 
 if __name__ == '__main__':
     unittest.main()
