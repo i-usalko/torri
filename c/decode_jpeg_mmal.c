@@ -201,17 +201,20 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool use_mmap, bool debug_i
    fd = open(file_path, O_RDONLY);
    if (fd < 0)
    {
+      status = MMAL_ECORRUPT;
       goto error;
    }
 
    if (fstat(fd, &s) < 0)
    {
+      status = MMAL_ECORRUPT;
       goto error;
    }
 
    mapped = mmap(0, s.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
    if (mapped == MAP_FAILED)
    {
+      status = MMAL_ECORRUPT;
       goto error;
    }
    not_read_bytes = s.st_size;
@@ -332,7 +335,7 @@ DECODING_RESULT_T* decode_jpeg_mmal(char *file_path, bool use_mmap, bool debug_i
          // buffer->length = fread(buffer->data, 1, buffer->alloc_size - 128, source_file);
 
          read_bytes = MIN(not_read_bytes, buffer->alloc_size - 128);
-         printf("OK 21 read bytes %d, not_read_bytes %d, s.st_size is %d\n", read_bytes, not_read_bytes, s.st_size);
+         // printf("OK 21 read bytes %d, not_read_bytes %d, s.st_size is %d\n", read_bytes, not_read_bytes, s.st_size);
          if (read_bytes > 0)
          {
             memcpy(buffer->data, mapped + (s.st_size - not_read_bytes), read_bytes);
