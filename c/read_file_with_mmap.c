@@ -16,6 +16,7 @@ READING_RESULT_T* read_file(char *file_path)
         char * error = strerror(errno);
         result->errors = malloc(strlen(error));
         memcpy(result->errors, error, strlen(error));
+	close(fd);
         return result;
     }
 
@@ -24,6 +25,7 @@ READING_RESULT_T* read_file(char *file_path)
         char * error = strerror(errno);
         result->errors = malloc(strlen(error));
         memcpy(result->errors, error, strlen(error));
+	close(fd);
         return result;
     }
 
@@ -33,11 +35,12 @@ READING_RESULT_T* read_file(char *file_path)
         char * error = strerror(errno);
         result->errors = malloc(strlen(error));
         memcpy(result->errors, error, strlen(error));
+	close(fd);
         return result;
     }
 
     result->data = malloc(s.st_size);
-    memcpy(result, mapped, s.st_size);
+    memcpy(result->data, mapped, s.st_size);
     result->length = s.st_size;
 
     if (munmap(mapped , s.st_size) < 0)
@@ -47,7 +50,9 @@ READING_RESULT_T* read_file(char *file_path)
         result->errors = malloc(strlen(error));
         memcpy(result->errors, error, strlen(error));
         result->length = -1;
+	close(fd);
         return result;
     }
+    close(fd);
     return result;
 }

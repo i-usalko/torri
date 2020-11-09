@@ -71,7 +71,7 @@ class TestMethods(unittest.TestCase):
 
     def test_read_file_with_mmap(self):
         t = Torri()
-        obj = t.read_file_with_mmap('Not exist path!')
+        obj = t.read_file_with_mmap('/media/pi/Transcend/.mock-camera-images/2020-06-22-07-10-39.72866b38fcdb4b8ba0c76f2ba48d7c67-v.jpg')
         print(obj)
         self.assertTrue(True)
 
